@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aircraft Efficiency Analyzer</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1>Aircraft Efficiency Analyzer</h1>
+
+<div class="dropdown-row">
+  <div class="dropdown-column">
+    <select id="aircraft1"></select>
+    <img id="img1" class="aircraft-image" src="" alt="Aircraft 1">
+  </div>
+  <div class="dropdown-column">
+    <select id="aircraft2"></select>
+    <img id="img2" class="aircraft-image" src="" alt="Aircraft 2">
+  </div>
+</div>
+
+<!--
+  <div style="display:flex; gap:1rem; justify-content:space-between;">
+    <img id="img1" class="aircraft-image" src="" alt="Aircraft 10">
+    <img id="img2" class="aircraft-image" src="" alt="Aircraft 2">
+  </div>
+-->
+
+  <button onclick="toggleMode()">Toggle Dark Mode</button>
+  <div class="score-box" id="scoreBox">Efficiency Score: -- / 10</div>
+
+  <table>
+    <thead><tr><th>Parameter</th><th>Value</th><th>Unit</th></tr></thead>
+    <tbody id="data-table"></tbody>
+  </table>
+
+  <canvas id="efficiencyChart" height="100"></canvas>
+</div>
+
+<script>
+const aircraftList = [
+  { id: "cessna", name: "Cessna 172", image: "cessna172.png" },
+  { id: "phenom", name: "Phenom 100", image: "phenom100.png" },
+  { id: "phenom300", name: "Phenom 300", image: "phenom100.png" },
+  { id: "embx", name: "EMB 121 Xingu I", image: "embx.png" },
+  { id: "hondajet", name: "HondaJet", image: "hondaha240.png" },
+  { id: "an74vip", name: "An-74VIP", image: "an74vip.png" }
+];
+
+const aircraftData = {
+  // Crew breakdowns based on example and instructions:
+  // Cessna: 3 total = 3 crew, 0 engineers, 0 tech
+  // Phenom: 5 total = 3 crew, 1 engineer, 1 tech
+  // EMBX:   5 total = 3 crew, 1 engineer, 1 tech
+  cessna: {
+    Price: [51000, "USD"],
+    Seats: [3, "passengers"],
+    Range: [1000, "km"],
+    "Fuel Consumption": [3.76, "lbs/km"],
+    "Cruise Speed": [221, "kph"],
+    "A-Check": [4682, "USD"],
+    "Maintenance Interval": [400, "hours"],
+    "Crew Total": [1, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [1, "people"],
+    "CO2 Emission": [0.05, "kg/pax/km"]
+  },
+  phenom: {
+    Price: [68000, "USD"],
+    Seats: [4, "passengers"],
+    Range: [2182, "km"],
+    "Fuel Consumption": [7.20, "lbs/km"],
+    "Cruise Speed": [708, "kph"],
+    "A-Check": [1900, "USD"],
+    "Maintenance Interval": [490, "hours"],
+    "Crew Total": [3, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [1, "people"],
+    "CO2 Emission": [0.10, "kg/pax/km"]
+  },
+  phenom300: {
+    Price: [102000, "USD"],
+    Seats: [6, "passengers"],
+    Range: [3334, "km"],
+    "Fuel Consumption": [8.72, "lbs/km"],
+    "Cruise Speed": [851, "kph"],
+    "A-Check": [3658, "USD"],
+    "Maintenance Interval": [460, "hours"],
+    "Crew Total": [3, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [1, "people"],
+    "CO2 Emission": [0.10, "kg/pax/km"]
+  },
+  embx: {
+    Price: [85000, "USD"],
+    Seats: [5, "passengers"],
+    Range: [2352, "km"],
+    "Fuel Consumption": [7.76, "lbs/km"],
+    "Cruise Speed": [329, "kph"],
+    "A-Check": [6588, "USD"],
+    "Maintenance Interval": [350, "hours"],
+    "Crew Total": [3, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [1, "people"],
+    "CO2 Emission": [0.10, "kg/pax/km"]
+  },
+  hondajet: {
+    Price: [100000, "USD"],
+    Seats: [6, "passengers"],
+    Range: [2700, "km"],
+    "Fuel Consumption": [6.00, "lbs/km"],
+    "Cruise Speed": [782, "kph"],
+    "A-Check": [5000, "USD"],
+    "Maintenance Interval": [450, "hours"],
+    "Crew Total": [3, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [1, "people"],
+    "CO2 Emission": [0.10, "kg/pax/km"]
+  },
+  an74vip: {
+    Price: [100722, "USD"],
+    Seats: [12, "passengers"],
+    Range: [3300, "km"],
+    "Fuel Consumption": [7.68, "lbs/km"],
+    "Cruise Speed": [539, "kph"],
+    "A-Check": [18130, "USD"],
+    "Maintenance Interval": [350, "hours"],
+    "Crew Total": [3, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [3, "people"],
+    "CO2 Emission": [0.10, "kg/pax/km"]
+  }
+};
+
+function formatNumber(n) {
+  return new Intl.NumberFormat("de-DE").format(n);
+}
+
+function populateDropdowns() {
+  const sortedList = [...aircraftList].sort((a, b) => a.name.localeCompare(b.name));
+  const s1 = document.getElementById("aircraft1");
+  const s2 = document.getElementById("aircraft2");
+  s1.innerHTML = "";
+  s2.innerHTML = '<option value="">-- None --</option>';
+  sortedList.forEach(a => {
+    const option = `<option value="${a.id}">${a.name}</option>`;
+    s1.innerHTML += option;
+    s2.innerHTML += option;
+  });
+  s1.value = "cessna";
+  s2.value = "";
+}
+
+function updateData() {
+  const id1 = document.getElementById("aircraft1").value;
+  const id2 = document.getElementById("aircraft2").value;
+  const d1 = aircraftData[id1];
+  const d2 = id2 ? aircraftData[id2] : null;
+  const table = document.getElementById("data-table");
+  table.innerHTML = "";
+
+  const img1 = document.getElementById("img1");
+  const img2 = document.getElementById("img2");
+  const ac1 = aircraftList.find(a => a.id === id1);
+  const ac2 = aircraftList.find(a => a.id === id2);
+  img1.src = ac1 ? `./images/${ac1.image}` : "";
+  img1.style.display = "block";
+  if (!id2) {
+    img2.src = "";
+    img2.style.display = "none";
+  } else {
+    img2.src = `./images/${ac2.image}`;
+    img2.style.display = "block";
+  }
+
+  const betterIfHigher = ["Seats", "Range", "Cruise Speed", "Maintenance Interval"];
+  const betterIfLower = ["Price", "Fuel Consumption", "A-Check", "Crew Total", "Engineers", "Tech", "CO2 Emission"];
+
+  const keys = ["Price", "Seats", "Range", "Fuel Consumption", "CO2 Emission", "Cruise Speed", "A-Check", "Maintenance Interval", "Crew Total", "Engineers", "Tech"];
+  for (let key of keys) {
+    const v1 = d1[key][0], unit = d1[key][1];
+    const v2 = d2 && d2[key] ? d2[key][0] : null;
+    let diff = "";
+    if (v2 !== null) {
+      const delta = v1 - v2;
+      if (betterIfHigher.includes(key)) {
+        diff = delta > 0 ? ` <span class="diff-green">↑ +${formatNumber(delta)}</span>` : delta < 0 ? ` <span class="diff-red">↓ ${formatNumber(Math.abs(delta))}</span>` : "";
+      } else if (betterIfLower.includes(key)) {
+        diff = delta > 0 ? ` <span class="diff-red">↑ +${formatNumber(delta)}</span>` : delta < 0 ? ` <span class="diff-green">↓ ${formatNumber(Math.abs(delta))}</span>` : "";
+      }
+    }
+    table.innerHTML += `<tr><td>${key}</td><td>${formatNumber(v1)}${diff}</td><td>${unit}</td></tr>`;
+  }
+
+  drawChart(d1, d2);
+}
+
+function drawChart(d1, d2) {
+  const calcScore = d => {
+    const s = d.Seats[0], r = d.Range[0], p = d.Price[0], f = d["Fuel Consumption"][0];
+    const sp = d["Cruise Speed"][0], a = d["A-Check"][0], m = d["Maintenance Interval"][0];
+    const c = d["Crew Total"][0], co = d["CO2 Emission"][0];
+    return [
+      p / (s * r) < 40 ? 10 : 8,
+      f / s < 1.5 ? 10 : 8,
+      sp > 600 ? 10 : 8,
+      a / m < 15 ? 10 : 8,
+      c <= 2 ? 10 : 6,
+      co <= 0.05 ? 10 : 8
+    ];
+  };
+
+  const s1 = calcScore(d1);
+  const s2 = d2 ? calcScore(d2) : null;
+  const avg1 = (s1.reduce((a,b)=>a+b,0)/6).toFixed(2);
+  const avg2 = s2 ? (s2.reduce((a,b)=>a+b,0)/6).toFixed(2) : null;
+  document.getElementById("scoreBox").innerHTML = `🚀 Efficiency Score: <strong>${avg1}</strong>/10` +
+    (avg2 ? (avg1 > avg2 ? ` ↑ +${(avg1 - avg2).toFixed(2)}` : ` ↓ ${(avg2 - avg1).toFixed(2)}`) : "");
+
+  radar.data.datasets[0].data = s1;
+  if (s2) {
+    if (radar.data.datasets.length < 2)
+      radar.data.datasets.push({ label: "Compare", data: s2, backgroundColor: "rgba(52,152,219,0.2)", borderColor: "#3498db" });
+    else radar.data.datasets[1].data = s2;
+  } else radar.data.datasets = [radar.data.datasets[0]];
+  radar.update();
+}
+
+function toggleMode() {
+  document.body.classList.toggle("light-mode");
+}
+
+const radar = new Chart(document.getElementById("efficiencyChart").getContext("2d"), {
+  type: "radar",
+  data: {
+    labels: ["Cost", "Fuel", "Speed", "Maintenance", "Crew", "CO₂"],
+    datasets: [{
+      label: "Primary",
+      data: [],
+      backgroundColor: "rgba(46,204,113,0.2)",
+      borderColor: "#2ecc71",
+      borderWidth: 2
+    }]
+  },
+  options: {
+    scales: { r: { suggestedMin: 0, suggestedMax: 10 } }
+  }
+});
+
+window.onload = () => {
+  populateDropdowns();
+  updateData();
+  document.getElementById("aircraft1").onchange = updateData;
+  document.getElementById("aircraft2").onchange = updateData;
+};
+</script>
+</body>
+</html>
