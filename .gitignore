@@ -1,0 +1,8 @@
+# Ignoriere VS Code Einstellungen
+.vscode/
+
+# Ignoriere macOS Dateien
+.DS_Store
+
+# Ignoriere alle Logfiles
+*.log

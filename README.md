@@ -1,4 +1,4 @@
-# AM4 Aircraft Efficiency Analyzer ✈️
+# Airline Manager 4 Aircraft Efficiency Analyzer ✈️
 
 A simple tool to compare aircraft stats in Airline Manager 4.  
 Helps you find the most efficient jets based on fuel use, range, speed, and more.
