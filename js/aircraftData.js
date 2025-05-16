@@ -1,4 +1,3 @@
-
 const aircraftData = {
   cessna: {
     Price: [51000, "USD"],
@@ -135,5 +134,73 @@ const aircraftData = {
     "CO2 Emission": [0.10, "kg/pax/km"],
     "Wingspan": [20, "m"],
     "Length": [20, "m"]
+  },
+  beech1900: {
+    Price: [119896, "USD"],
+    Seats: [19, "passengers"],
+    Range: [2907, "km"],
+    "Runway Required": [4500, "ft"],
+    "Service Ceiling": [30000, "ft"],
+    "Fuel Consumption": [9.36, "lbs/km"],
+    "Cruise Speed": [500, "kph"],
+    "A-Check": [21582, "USD"],
+    "Maintenance Interval": [380, "hours"],
+    "Crew Total": [3, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [1, "people"],
+    "CO2 Emission": [0.11, "kg/pax/km"],
+    "Wingspan": [18, "m"],
+    "Length": [18, "m"]
+  },
+  saabscan: {
+    Price: [113217, "USD"],
+    Seats: [32, "passengers"],
+    Range: [2510, "km"],
+    "Runway Required": [2000, "ft"],
+    "Service Ceiling": [20000, "ft"],
+    "Fuel Consumption": [9.27, "lbs/km"],
+    "Cruise Speed": [477, "kph"],
+    "A-Check": [42456, "USD"],
+    "Maintenance Interval": [210, "hours"],
+    "Crew Total": [3, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [3, "people"],
+    "CO2 Emission": [0.11, "kg/pax/km"],
+    "Wingspan": [21, "m"],
+    "Length": [28, "m"]
+  },
+  atr42: {
+    Price: [122750, "USD"],
+    Seats: [50, "passengers"],
+    Range: [1611, "km"],
+    "Runway Required": [6500, "ft"],
+    "Service Ceiling": [25000, "ft"],
+    "Fuel Consumption": [14.88, "lbs/km"],
+    "Cruise Speed": [550, "kph"],
+    "A-Check": [21482, "USD"],
+    "Maintenance Interval": [340, "hours"],
+    "Crew Total": [4, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [1, "people"],
+    "CO2 Emission": [0.20, "kg/pax/km"],
+    "Wingspan": [22, "m"],
+    "Length": [24, "m"]
+  },
+  dhc8: {
+    Price: [124381, "USD"],
+    Seats: [37, "passengers"],
+    Range: [1713, "km"],
+    "Runway Required": [2000, "ft"],
+    "Service Ceiling": [25000, "ft"],
+    "Fuel Consumption": [17.51, "lbs/km"],
+    "Cruise Speed": [585, "kph"],
+    "A-Check": [14926, "USD"],
+    "Maintenance Interval": [480, "hours"],
+    "Crew Total": [3, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [2, "people"],
+    "CO2 Emission": [0.21, "kg/pax/km"],
+    "Wingspan": [22, "m"],
+    "Length": [26, "m"]
   }
 };

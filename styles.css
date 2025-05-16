@@ -182,3 +182,10 @@ th, td {
   height: 400px;
   /* clip-path: inset(10px 0 10px 0); */
 }
+
+.dropdown-label {
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  color: var(--text-select, #666);
+}
