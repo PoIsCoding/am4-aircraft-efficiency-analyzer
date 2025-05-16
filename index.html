@@ -47,7 +47,9 @@ const aircraftList = [
   { id: "phenom300", name: "Phenom 300", image: "phenom100.png" },
   { id: "embx", name: "EMB 121 Xingu I", image: "embx.png" },
   { id: "hondajet", name: "HondaJet", image: "hondaha240.png" },
-  { id: "an74vip", name: "An-74VIP", image: "an74vip.png" }
+  { id: "an74vip", name: "An-74VIP", image: "an74vip.png" },
+  { id: "saab340", name: "Saab 340", image: "saab340.png" },
+  { id: "legacy450", name: "Legacy 450", image: "legacy600.png" }
 ];
 
 const aircraftData = {
@@ -59,6 +61,8 @@ const aircraftData = {
     Price: [51000, "USD"],
     Seats: [3, "passengers"],
     Range: [1000, "km"],
+    "Runway Required": [1281, "ft"],
+    "Service Ceiling": [14100, "ft"],
     "Fuel Consumption": [3.76, "lbs/km"],
     "Cruise Speed": [221, "kph"],
     "A-Check": [4682, "USD"],
@@ -66,12 +70,16 @@ const aircraftData = {
     "Crew Total": [1, "people"],
     "Engineers": [1, "people"],
     "Tech": [1, "people"],
-    "CO2 Emission": [0.05, "kg/pax/km"]
+    "CO2 Emission": [0.05, "kg/pax/km"],
+    "Wingspan": [8, "m"],
+    "Length": [11, "m"]
   },
   phenom: {
     Price: [68000, "USD"],
     Seats: [4, "passengers"],
     Range: [2182, "km"],
+    "Runway Required": [3480, "ft"],
+    "Service Ceiling": [41000, "ft"],
     "Fuel Consumption": [7.20, "lbs/km"],
     "Cruise Speed": [708, "kph"],
     "A-Check": [1900, "USD"],
@@ -79,12 +87,16 @@ const aircraftData = {
     "Crew Total": [3, "people"],
     "Engineers": [1, "people"],
     "Tech": [1, "people"],
-    "CO2 Emission": [0.10, "kg/pax/km"]
+    "CO2 Emission": [0.10, "kg/pax/km"],
+    "Wingspan": [13, "m"],
+    "Length": [12, "m"]
   },
   phenom300: {
     Price: [102000, "USD"],
     Seats: [6, "passengers"],
     Range: [3334, "km"],
+    "Runway Required": [3900, "ft"],
+    "Service Ceiling": [41000, "ft"],
     "Fuel Consumption": [8.72, "lbs/km"],
     "Cruise Speed": [851, "kph"],
     "A-Check": [3658, "USD"],
@@ -92,12 +104,16 @@ const aircraftData = {
     "Crew Total": [3, "people"],
     "Engineers": [1, "people"],
     "Tech": [1, "people"],
-    "CO2 Emission": [0.10, "kg/pax/km"]
+    "CO2 Emission": [0.10, "kg/pax/km"],
+    "Wingspan": [16, "m"],
+    "Length": [16, "m"]
   },
   embx: {
     Price: [85000, "USD"],
     Seats: [5, "passengers"],
     Range: [2352, "km"],
+    "Runway Required": [4250, "ft"],
+    "Service Ceiling": [33500, "ft"],
     "Fuel Consumption": [7.76, "lbs/km"],
     "Cruise Speed": [329, "kph"],
     "A-Check": [6588, "USD"],
@@ -105,12 +121,16 @@ const aircraftData = {
     "Crew Total": [3, "people"],
     "Engineers": [1, "people"],
     "Tech": [1, "people"],
-    "CO2 Emission": [0.10, "kg/pax/km"]
+    "CO2 Emission": [0.10, "kg/pax/km"],
+    "Wingspan": [12, "m"],
+    "Length": [14, "m"]
   },
   hondajet: {
     Price: [100000, "USD"],
     Seats: [6, "passengers"],
     Range: [2700, "km"],
+    "Runway Required": [3930, "ft"],
+    "Service Ceiling": [43000, "ft"],
     "Fuel Consumption": [6.00, "lbs/km"],
     "Cruise Speed": [782, "kph"],
     "A-Check": [5000, "USD"],
@@ -118,12 +138,16 @@ const aircraftData = {
     "Crew Total": [3, "people"],
     "Engineers": [1, "people"],
     "Tech": [1, "people"],
-    "CO2 Emission": [0.10, "kg/pax/km"]
+    "CO2 Emission": [0.10, "kg/pax/km"],
+    "Wingspan": [13, "m"],
+    "Length": [12, "m"]
   },
   an74vip: {
     Price: [100722, "USD"],
     Seats: [12, "passengers"],
     Range: [3300, "km"],
+    "Runway Required": [4900, "ft"],
+    "Service Ceiling": [30000, "ft"],
     "Fuel Consumption": [7.68, "lbs/km"],
     "Cruise Speed": [539, "kph"],
     "A-Check": [18130, "USD"],
@@ -131,7 +155,43 @@ const aircraftData = {
     "Crew Total": [3, "people"],
     "Engineers": [1, "people"],
     "Tech": [3, "people"],
-    "CO2 Emission": [0.10, "kg/pax/km"]
+    "CO2 Emission": [0.10, "kg/pax/km"],
+    "Wingspan": [28, "m"],
+    "Length": [32, "m"]
+  },
+  saab340: {
+  legacy450: {
+    Price: [110501, "USD"],
+    Seats: [7, "passengers"],
+    Range: [4260, "km"],
+    "Runway Required": [2000, "ft"],
+    "Service Ceiling": [40000, "ft"],
+    "Fuel Consumption": [7.60, "lbs/km"],
+    "Cruise Speed": [837, "kph"],
+    "A-Check": [4420, "USD"],
+    "Maintenance Interval": [520, "hours"],
+    "Crew Total": [3, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [1, "people"],
+    "CO2 Emission": [0.10, "kg/pax/km"],
+    "Wingspan": [20, "m"],
+    "Length": [20, "m"]
+  }
+    Price: [109241, "USD"],
+    Seats: [37, "passengers"],
+    Range: [1730, "km"],
+    "Runway Required": [4600, "ft"],
+    "Service Ceiling": [25000, "ft"],
+    "Fuel Consumption": [13.65, "lbs/km"],
+    "Cruise Speed": [425, "kph"],
+    "A-Check": [19664, "USD"],
+    "Maintenance Interval": [380, "hours"],
+    "Crew Total": [3, "people"],
+    "Engineers": [1, "people"],
+    "Tech": [2, "people"],
+    "CO2 Emission": [0.19, "kg/pax/km"],
+    "Wingspan": [20, "m"],
+    "Length": [21, "m"]
   }
 };
 
@@ -176,10 +236,10 @@ function updateData() {
     img2.style.display = "block";
   }
 
-  const betterIfHigher = ["Seats", "Range", "Cruise Speed", "Maintenance Interval"];
-  const betterIfLower = ["Price", "Fuel Consumption", "A-Check", "Crew Total", "Engineers", "Tech", "CO2 Emission"];
+  const betterIfHigher = ["Seats", "Range", "Cruise Speed", "Maintenance Interval", "Service Ceiling"];
+  const betterIfLower = ["Price", "Fuel Consumption", "A-Check", "Crew Total", "Engineers", "Tech", "CO2 Emission", "Runway Required", "Wingspan", "Length"];
 
-  const keys = ["Price", "Seats", "Range", "Fuel Consumption", "CO2 Emission", "Cruise Speed", "A-Check", "Maintenance Interval", "Crew Total", "Engineers", "Tech"];
+  const keys = ["Price", "Seats", "Range", "Runway Required", "Service Ceiling", "Fuel Consumption", "CO2 Emission", "Cruise Speed", "A-Check", "Maintenance Interval", "Crew Total", "Engineers", "Tech", "Wingspan", "Length"];
   for (let key of keys) {
     const v1 = d1[key][0], unit = d1[key][1];
     const v2 = d2 && d2[key] ? d2[key][0] : null;
@@ -190,6 +250,9 @@ function updateData() {
         diff = delta > 0 ? ` <span class="diff-green">↑ +${formatNumber(delta)}</span>` : delta < 0 ? ` <span class="diff-red">↓ ${formatNumber(Math.abs(delta))}</span>` : "";
       } else if (betterIfLower.includes(key)) {
         diff = delta > 0 ? ` <span class="diff-red">↑ +${formatNumber(delta)}</span>` : delta < 0 ? ` <span class="diff-green">↓ ${formatNumber(Math.abs(delta))}</span>` : "";
+      } else {
+        diff = delta > 0 ? ` <span class="diff-green">↑ +${formatNumber(delta)}</span>` : 
+               delta < 0 ? ` <span class="diff-red">↓ ${formatNumber(Math.abs(delta))}</span>` : "";
       }
     }
     table.innerHTML += `<tr><td>${key}</td><td>${formatNumber(v1)}${diff}</td><td>${unit}</td></tr>`;
@@ -203,20 +266,23 @@ function drawChart(d1, d2) {
     const s = d.Seats[0], r = d.Range[0], p = d.Price[0], f = d["Fuel Consumption"][0];
     const sp = d["Cruise Speed"][0], a = d["A-Check"][0], m = d["Maintenance Interval"][0];
     const c = d["Crew Total"][0], co = d["CO2 Emission"][0];
+    const rw = d["Runway Required"][0], ceil = d["Service Ceiling"][0];
     return [
       p / (s * r) < 40 ? 10 : 8,
       f / s < 1.5 ? 10 : 8,
       sp > 600 ? 10 : 8,
       a / m < 15 ? 10 : 8,
       c <= 2 ? 10 : 6,
-      co <= 0.05 ? 10 : 8
+      co <= 0.05 ? 10 : 8,
+      rw < 3000 ? 10 : 8,
+      ceil > 25000 ? 10 : 8
     ];
   };
 
   const s1 = calcScore(d1);
   const s2 = d2 ? calcScore(d2) : null;
-  const avg1 = (s1.reduce((a,b)=>a+b,0)/6).toFixed(2);
-  const avg2 = s2 ? (s2.reduce((a,b)=>a+b,0)/6).toFixed(2) : null;
+  const avg1 = (s1.reduce((a,b)=>a+b,0)/8).toFixed(2);
+  const avg2 = s2 ? (s2.reduce((a,b)=>a+b,0)/8).toFixed(2) : null;
   document.getElementById("scoreBox").innerHTML = `🚀 Efficiency Score: <strong>${avg1}</strong>/10` +
     (avg2 ? (avg1 > avg2 ? ` ↑ +${(avg1 - avg2).toFixed(2)}` : ` ↓ ${(avg2 - avg1).toFixed(2)}`) : "");
 
@@ -236,7 +302,7 @@ function toggleMode() {
 const radar = new Chart(document.getElementById("efficiencyChart").getContext("2d"), {
   type: "radar",
   data: {
-    labels: ["Cost", "Fuel", "Speed", "Maintenance", "Crew", "CO₂"],
+    labels: ["Cost", "Fuel", "Speed", "Maintenance", "Crew", "CO₂", "Runway", "Ceiling"],
     datasets: [{
       label: "Primary",
       data: [],
