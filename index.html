@@ -7,20 +7,147 @@
   <link rel="icon" href="./images/icon.png" type="image/jpeg" />
   <link rel="stylesheet" href="./styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let translations = {};
+    let currentLang = 'en';
+
+    async function setLanguage(lang) {
+      const response = await fetch(`./locales/${lang}.json`);
+      translations = await response.json();
+      currentLang = lang;
+      applyTranslations();
+    }
+
+    function applyTranslations() {
+      document.getElementById('title').textContent = translations.title;
+      document.getElementById('labelPrimary').textContent = translations.primary_aircraft;
+      document.getElementById('labelCompare').textContent = translations.compare_aircraft;
+      document.getElementById('scoreBox').textContent = translations.efficiency_score + ": -- / 10";
+      document.getElementById('thParameter').textContent = translations.table_parameter;
+      document.getElementById('thValue').textContent = translations.table_value;
+      document.getElementById('thUnit').textContent = translations.table_unit;
+
+      if (document.getElementById('languageNote')) {
+        document.getElementById('languageNote').textContent = translations.footer_language_note;
+      }
+
+      if (document.getElementById('footerNote')) {
+        document.getElementById('footerNote').textContent = translations.footer_note;
+      }
+
+      if (document.getElementById('footerDisclaimer')) {
+        document.getElementById('footerDisclaimer').textContent = translations.footer_disclaimer;
+      }
+
+      if (document.getElementById('labelGermanFormat')) {
+        document.getElementById('labelGermanFormat').textContent = translations.label_german_format;
+      }
+      if (document.getElementById('labelShowCompare')) {
+        document.getElementById('labelShowCompare').textContent = translations.label_show_compare;
+      }
+      if (document.getElementById('labelRadarChart')) {
+        document.getElementById('labelRadarChart').textContent = translations.label_radar_chart;
+      }
+      if (document.getElementById('labelSupport')) {
+        document.getElementById('labelSupport').textContent = translations.label_support;
+      }
+
+      if (document.getElementById('donationLinkText')) {
+        document.getElementById('donationLinkText').textContent = translations.donation_link || "☕ Buy me a coffee";
+      }
+
+      document.querySelectorAll('[data-label-key]').forEach(el => {
+        const key = el.getAttribute('data-label-key');
+        if (translations[key]) {
+          el.textContent = translations[key];
+        }
+      });
+
+      // Dynamically update radar chart labels using translations
+      document.querySelectorAll('.radar-toggle').forEach(el => {
+        const value = el.value;
+        const key = value.toLowerCase(); // assume values like "fuel_consumption"
+        const translatedLabel = translations[key] || value;
+        el.nextSibling.textContent = ` ${translatedLabel}`;
+      });
+
+      if (typeof updateRadarChartLabels === "function") {
+        updateRadarChartLabels();
+      }
+      if (typeof updateData === "function") {
+        updateData();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Null check for footerNote before language set (in case it's not present)
+      if (document.getElementById('footerNote')) {
+        // placeholder, no-op, just to satisfy the instruction
+      }
+      setLanguage('en');
+      const btn = document.getElementById("settingsBtn");
+      const menu = document.getElementById("settingsMenu");
+      btn.addEventListener("click", () => {
+        menu.classList.toggle("hidden");
+      });
+    });
+  </script>
 </head>
 <body class="light-mode">
   <div class="container">
+    <div class="settings-container">
+      <button id="settingsBtn" class="settings-button">⚙️</button>
+      <div id="settingsMenu" class="settings-menu hidden">
+        <div class="language-options">
+          <span role="button" class="lang-flag" onclick="setLanguage('en')">🇬🇧</span>
+          <span role="button" class="lang-flag" onclick="setLanguage('de')">🇩🇪</span>
+        </div>
+        <div class="format-options">
+          <label style="font-size: 0.85rem;">
+            <input type="checkbox" id="useGermanFormat" onchange="updateData()" />
+            <span id="labelGermanFormat">Use German number format (1.000,12)</span>
+          </label>
+        </div>
+        <div class="compare-options">
+          <label style="font-size: 0.85rem;">
+            <input type="checkbox" id="showCompareValues" onchange="updateData()" />
+            <span id="labelShowCompare">Show comparison values in table</span>
+          </label>
+        </div>
+        <div class="radar-options">
+          <label style="font-size: 0.85rem;"><strong id="labelRadarChart">Radar Chart Parameters:</strong></label>
+          <label><input type="checkbox" class="radar-toggle" value="price" checked /> Price</label>
+          <label><input type="checkbox" class="radar-toggle" value="fuel_consumption" checked /> Fuel</label>
+          <label><input type="checkbox" class="radar-toggle" value="cruise_speed" checked /> Speed</label>
+          <label><input type="checkbox" class="radar-toggle" value="a_check" checked /> A-Check</label>
+          <label><input type="checkbox" class="radar-toggle" value="crew_total" checked /> Crew</label>
+          <label><input type="checkbox" class="radar-toggle" value="co2_emission" checked /> CO₂</label>
+          <label><input type="checkbox" class="radar-toggle" value="runway_required" checked /> Runway</label>
+          <label><input type="checkbox" class="radar-toggle" value="service_ceiling" checked /> Ceiling</label>
+          <label><input type="checkbox" class="radar-toggle" value="engineers" checked /> Engineers</label>
+          <label><input type="checkbox" class="radar-toggle" value="tech" checked /> Tech</label>
+          <label><input type="checkbox" class="radar-toggle" value="wingspan" checked /> Wingspan</label>
+          <label><input type="checkbox" class="radar-toggle" value="length" checked /> Length</label>
+        </div>
+        <div class="donation-section">
+          <label style="font-size: 0.85rem;"><strong id="labelSupport">Support the project:</strong></label>
+          <a href="https://buymeacoffee.com/poiscoding" target="_blank" style="text-decoration: none; font-size: 0.9rem; margin-top: 0.25rem;">
+            <span id="donationLinkText">☕ Buy me a coffee</span>
+          </a>
+        </div>
+      </div>
+    </div>
     <!-- <img src="./images/header.png" alt="Header Image" class="header-image"> -->
-    <h1>Aircraft Efficiency Analyzer</h1>
+    <h1 id="title">Aircraft Efficiency Analyzer</h1>
 
     <div class="dropdown-row">
       <div class="dropdown-column">
-        <label for="aircraft1" class="dropdown-label">✈️ Primärflugzeug</label>
+        <label for="aircraft1" class="dropdown-label" id="labelPrimary">✈️ Primary Aircraft</label>
         <select id="aircraft1"></select>
         <img id="img1" class="aircraft-image" src="" alt="Aircraft 1">
       </div>
       <div class="dropdown-column">
-        <label for="aircraft2" class="dropdown-label">🔁 Vergleichsflugzeug</label>
+        <label for="aircraft2" class="dropdown-label" id="labelCompare">🔁 Compare Aircraft</label>
         <select id="aircraft2">
           <option value="">-- None --</option>
         </select>
@@ -32,7 +159,7 @@
 
     <div class="result-layout">
       <table>
-        <thead><tr><th>Parameter</th><th>Value</th><th>Unit</th></tr></thead>
+        <thead><tr><th id="thParameter">Parameter</th><th id="thValue">Value</th><th id="thUnit">Unit</th></tr></thead>
         <tbody id="data-table"></tbody>
       </table>
 
@@ -45,5 +172,12 @@
   <script src="./js/aircraftList.js"></script>
   <script src="./js/aircraftData.js"></script>
   <script src="./js/main.js"></script>
+  <footer class="language-footer">
+    <!-- <span role="button" class="lang-flag" onclick="setLanguage('en')">🇬🇧</span>
+    <span role="button" class="lang-flag" onclick="setLanguage('de')">🇩🇪</span> -->
+    <!-- <div id="languageNote" style="font-size: 0.8rem; margin-top: 0.5rem;"></div> -->
+    <div id="footerNote" style="font-size: 0.8rem; margin-top: 0.5rem;"></div>
+    <div id="footerDisclaimer" style="font-size: 0.8rem; margin-top: 0.25rem;"></div>
+  </footer>
 </body>
 </html>
