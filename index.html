@@ -8,9 +8,14 @@
   <link rel="stylesheet" href="./styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    // Translation data and current language state
     let translations = {};
     let currentLang = 'en';
 
+    /**
+     * Fetches and sets the language translations.
+     * @param {string} lang - Language code to set (e.g., 'en', 'de').
+     */
     async function setLanguage(lang) {
       const response = await fetch(`./locales/${lang}.json`);
       translations = await response.json();
@@ -18,35 +23,45 @@
       applyTranslations();
     }
 
+    /**
+     * Applies the loaded translations to all relevant UI elements.
+     * Updates text content and preserves certain inner HTML structures.
+     */
     function applyTranslations() {
+      // Update main title
       document.getElementById('title').textContent = translations.title;
+
+      // Update labels for aircraft selection
       document.getElementById('labelPrimary').textContent = translations.primary_aircraft;
       document.getElementById('labelCompare').textContent = translations.compare_aircraft;
+
+      // Update efficiency score box, preserving inner HTML structure and suffix
       const scoreBox = document.getElementById('scoreBox');
       if (scoreBox) {
-        // Preserve inner HTML tags and only update the label part
         const scoreHTML = scoreBox.innerHTML;
         const valueMatch = scoreHTML.match(/<strong>(.*?)<\/strong>/);
         const value = valueMatch ? valueMatch[1] : "--";
         const suffix = scoreHTML.includes("↑") ? scoreHTML.split("</strong>")[1] : "";
         scoreBox.innerHTML = `🚀 ${translations.efficiency_score}: <strong>${value}</strong>${suffix}`;
       }
+
+      // Update table headers
       document.getElementById('thParameter').textContent = translations.table_parameter;
       document.getElementById('thValue').textContent = translations.table_value;
       document.getElementById('thUnit').textContent = translations.table_unit;
 
+      // Update footer notes if present
       if (document.getElementById('languageNote')) {
         document.getElementById('languageNote').textContent = translations.footer_language_note;
       }
-
       if (document.getElementById('footerNote')) {
         document.getElementById('footerNote').textContent = translations.footer_note;
       }
-
       if (document.getElementById('footerDisclaimer')) {
         document.getElementById('footerDisclaimer').textContent = translations.footer_disclaimer;
       }
 
+      // Update settings menu labels
       if (document.getElementById('labelGermanFormat')) {
         document.getElementById('labelGermanFormat').textContent = translations.label_german_format;
       }
@@ -60,10 +75,12 @@
         document.getElementById('labelSupport').textContent = translations.label_support;
       }
 
+      // Update donation link text with fallback
       if (document.getElementById('donationLinkText')) {
         document.getElementById('donationLinkText').textContent = translations.donation_link || "☕ Buy me a coffee";
       }
 
+      // Update any elements with data-label-key attribute dynamically
       document.querySelectorAll('[data-label-key]').forEach(el => {
         const key = el.getAttribute('data-label-key');
         if (translations[key]) {
@@ -71,14 +88,15 @@
         }
       });
 
-      // Dynamically update radar chart labels using translations
+      // Dynamically update radar chart toggle labels using translations
       document.querySelectorAll('.radar-toggle').forEach(el => {
         const value = el.value;
-        const key = value.toLowerCase(); // assume values like "fuel_consumption"
+        const key = value.toLowerCase(); // Expected keys like "fuel_consumption"
         const translatedLabel = translations[key] || value;
         el.nextSibling.textContent = ` ${translatedLabel}`;
       });
 
+      // Call functions to update UI components if they exist
       if (typeof updateRadarChartLabels === "function") {
         updateRadarChartLabels();
       }
@@ -87,12 +105,17 @@
       }
     }
 
+    // Initialize event listeners and default language on DOM content loaded
     document.addEventListener("DOMContentLoaded", () => {
       // Null check for footerNote before language set (in case it's not present)
       if (document.getElementById('footerNote')) {
         // placeholder, no-op, just to satisfy the instruction
       }
+
+      // Set default language to English
       setLanguage('en');
+
+      // Settings button toggles the visibility of the settings menu
       const btn = document.getElementById("settingsBtn");
       const menu = document.getElementById("settingsMenu");
       btn.addEventListener("click", () => {
@@ -103,25 +126,35 @@
 </head>
 <body class="light-mode">
   <div class="container">
+
+    <!-- Settings Menu -->
     <div class="settings-container">
       <button id="settingsBtn" class="settings-button">⚙️</button>
       <div id="settingsMenu" class="settings-menu hidden">
+
+        <!-- Language Options -->
         <div class="language-options">
           <span role="button" class="lang-flag" onclick="setLanguage('en')">🇬🇧</span>
           <span role="button" class="lang-flag" onclick="setLanguage('de')">🇩🇪</span>
         </div>
+
+        <!-- Number Format Option -->
         <div class="format-options">
           <label style="font-size: 0.85rem;">
             <input type="checkbox" id="useGermanFormat" onchange="updateData()" />
             <span id="labelGermanFormat">Use German number format (1.000,12)</span>
           </label>
         </div>
+
+        <!-- Comparison Display Option -->
         <div class="compare-options">
           <label style="font-size: 0.85rem;">
             <input type="checkbox" id="showCompareValues" onchange="updateData()" />
             <span id="labelShowCompare">Show comparison values in table</span>
           </label>
         </div>
+
+        <!-- Radar Chart Parameter Toggles -->
         <div class="radar-options">
           <label style="font-size: 0.85rem;"><strong id="labelRadarChart">Radar Chart Parameters:</strong></label>
           <label><input type="checkbox" class="radar-toggle" value="price" checked /> Price</label>
@@ -137,37 +170,51 @@
           <label><input type="checkbox" class="radar-toggle" value="wingspan" checked /> Wingspan</label>
           <label><input type="checkbox" class="radar-toggle" value="length" checked /> Length</label>
         </div>
+
+        <!-- Donation Section -->
         <div class="donation-section">
           <label style="font-size: 0.85rem;"><strong id="labelSupport">Support the project:</strong></label>
           <a href="https://buymeacoffee.com/poiscoding" target="_blank" style="text-decoration: none; font-size: 0.9rem; margin-top: 0.25rem;">
             <span id="donationLinkText">☕ Buy me a coffee</span>
           </a>
         </div>
+
       </div>
     </div>
+
+    <!-- Main Header -->
     <!-- <img src="./images/header.png" alt="Header Image" class="header-image"> -->
     <h1 id="title">Aircraft Efficiency Analyzer</h1>
 
+    <!-- Dropdown Selection for Aircraft -->
     <div class="dropdown-row">
       <div class="dropdown-column">
         <label for="aircraft1" class="dropdown-label" id="labelPrimary">✈️ Primary Aircraft</label>
         <select id="aircraft1"></select>
-        <img id="img1" class="aircraft-image" src="" alt="Aircraft 1">
+        <img id="img1" class="aircraft-image" src="" alt="Aircraft 1" />
       </div>
       <div class="dropdown-column">
         <label for="aircraft2" class="dropdown-label" id="labelCompare">🔁 Compare Aircraft</label>
         <select id="aircraft2">
           <option value="">-- None --</option>
         </select>
-        <img id="img2" class="aircraft-image" src="" alt="Aircraft 2">
+        <img id="img2" class="aircraft-image" src="" alt="Aircraft 2" />
       </div>
     </div>
 
+    <!-- Efficiency Score Display -->
     <div class="score-box" id="scoreBox">Efficiency Score: -- / 10</div>
 
+    <!-- Results Layout: Table and Chart -->
     <div class="result-layout">
       <table>
-        <thead><tr><th id="thParameter">Parameter</th><th id="thValue">Value</th><th id="thUnit">Unit</th></tr></thead>
+        <thead>
+          <tr>
+            <th id="thParameter">Parameter</th>
+            <th id="thValue">Value</th>
+            <th id="thUnit">Unit</th>
+          </tr>
+        </thead>
         <tbody id="data-table"></tbody>
       </table>
 
@@ -177,12 +224,19 @@
     </div>
   </div>
 
+  <!-- External JavaScript Files -->
   <script src="./js/aircraftList.js"></script>
   <script src="./js/aircraftData.js"></script>
+  <script src="./js/scoringUtils.js"></script>
+  <script src="./js/efficiencyScore.js"></script>
   <script src="./js/main.js"></script>
+
+  <!-- Footer with Language and Disclaimer Notes -->
   <footer class="language-footer">
-    <!-- <span role="button" class="lang-flag" onclick="setLanguage('en')">🇬🇧</span>
-    <span role="button" class="lang-flag" onclick="setLanguage('de')">🇩🇪</span> -->
+    <!-- Language flags commented out:
+    <span role="button" class="lang-flag" onclick="setLanguage('en')">🇬🇧</span>
+    <span role="button" class="lang-flag" onclick="setLanguage('de')">🇩🇪</span>
+    -->
     <!-- <div id="languageNote" style="font-size: 0.8rem; margin-top: 0.5rem;"></div> -->
     <div id="footerNote" style="font-size: 0.8rem; margin-top: 0.5rem;"></div>
     <div id="footerDisclaimer" style="font-size: 0.8rem; margin-top: 0.25rem;"></div>

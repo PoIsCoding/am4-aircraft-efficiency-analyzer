@@ -1,3 +1,4 @@
+/* === Layout & Containers === */
 /* --- Responsive table/chart layout --- */
 .result-layout {
   display: flex;
@@ -25,6 +26,8 @@
     flex: 0 0 400px;
   }
 }
+
+/* === Diff Colors for Positive/Negative Values === */
 .diff-green {
     color: #2ecc71;
     font-weight: bold;
@@ -35,6 +38,7 @@
     font-weight: bold;
 }
 
+/* === Base Body Styling === */
 body {
     font-family: sans-serif;
     background: #121212;
@@ -43,6 +47,7 @@ body {
     transition: background 0.3s, color 0.3s;
 }
 
+/* === Theme: Light & Dark Mode === */
 .light-mode {
     background: #f0f0f0;
     color: #000;
@@ -53,6 +58,7 @@ body {
     color: #fff;
 }
 
+/* === Container Styling === */
 .container {
     max-width: 1000px;
     width: 100%;
@@ -71,7 +77,7 @@ body {
     color: #ffffff;
 }
 
-
+/* === Dropdown Styling === */
 select {
   appearance: none;
   -webkit-appearance: none;
@@ -111,6 +117,7 @@ select:focus {
   border-color: #555;
 }
 
+/* === Dropdown Layout === */
 .dropdown-row {
     display: flex;
     flex-direction: column;
@@ -141,16 +148,19 @@ select:focus {
     width: 100%;
 }
 
+/* === Table Styling === */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;}
+    margin-top: 1rem;
+}
 
 th, td {
     padding: 0.5rem;
     border-bottom: 1px solid #444;
 }
 
+/* === Score Box Styling === */
 .score-box {
     padding: 1rem;
     background: #2ecc71;
@@ -160,7 +170,7 @@ th, td {
     text-align: center;
 }
 
-/* Aircraft images unter den Dropdowns */
+/* === Aircraft Images Styling (under dropdowns) === */
 .aircraft-image {
   max-height: 200px;
   width: 100%;
@@ -171,6 +181,7 @@ th, td {
   display: block;
 }
 
+/* === Header Image Styling === */
 .header-image {
   width: 100%;
   max-width: 1000px;
@@ -183,17 +194,21 @@ th, td {
   /* clip-path: inset(10px 0 10px 0); */
 }
 
+/* === Dropdown Label Styling === */
 .dropdown-label {
   font-weight: bold;
   font-size: 0.9rem;
   margin-bottom: 0.25rem;
   color: var(--text-select, #666);
 }
+
+/* === Language Footer Styling === */
 .language-footer {
   text-align: center;
   margin-top: 2rem;
 }
 
+/* === Language Flag Styling === */
 .lang-flag {
   font-size: 1.5rem;
   cursor: pointer;
@@ -205,6 +220,7 @@ th, td {
   transform: scale(1.1);
 }
 
+/* === Language Switcher Styling === */
 .language-switcher {
       position: absolute;
       top: 1rem;
@@ -218,6 +234,7 @@ th, td {
       margin-left: 0.5rem;
     }
 
+/* === Settings Container & Button Styling === */
 .settings-container {
   position: relative;
   display: flex;
@@ -233,6 +250,7 @@ th, td {
   color: inherit;
 }
 
+/* === Settings Menu Styling === */
 .settings-menu {
   margin-top: 0.5rem;
   background-color: rgba(255, 255, 255, 0.9);

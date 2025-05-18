@@ -1,4 +1,10 @@
+// Import efficiencyScore.js if using ES6 modules
+// import './efficiencyScore.js';
 let useGermanFormat = false;
+
+// === Global Variables & Helpers ===
+
+// Format a number according to the selected locale (German or US) with up to 2 decimal places
 function formatNumber(num) {
   const checkbox = document.getElementById("useGermanFormat");
   const locale = checkbox && checkbox.checked ? "de-DE" : "en-US";
@@ -8,6 +14,9 @@ function formatNumber(num) {
   });
 }
 
+// === UI Initialization ===
+
+// Populate the aircraft dropdowns with sorted aircraft names, setting default selections
 function populateDropdowns() {
   const s1 = document.getElementById("aircraft1");
   const s2 = document.getElementById("aircraft2");
@@ -31,6 +40,9 @@ function populateDropdowns() {
   s2.value = "";
 }
 
+// === Data Handling & Table Update ===
+
+// Update the displayed aircraft data and comparison table based on selected aircraft
 function updateData() {
   const id1 = document.getElementById("aircraft1").value;
   const id2 = document.getElementById("aircraft2").value;
@@ -59,6 +71,7 @@ function updateData() {
   const betterIfHigher = ["Seats", "Range", "Cruise Speed", "Maintenance Interval", "Service Ceiling"];
   const betterIfLower = ["Price", "Fuel Consumption", "A-Check", "Crew Total", "Engineers", "Tech", "CO2 Emission", "Runway Required", "Wingspan", "Length"];
 
+  // For each key, display the primary aircraft's value, and if comparison selected, show difference with color-coded arrows
   for (let key of keys) {
     const v1 = d1[key][0];
     const keyLabel = key.toLowerCase().replace(/[\s-]/g, "_");
@@ -85,35 +98,25 @@ function updateData() {
   drawChart(d1, d2);
 }
 
+// === Efficiency Chart ===
+
+// Calculate efficiency scores and build radar chart comparing selected aircraft
 function drawChart(d1, d2) {
-  const calcScore = d => {
-    const s = d.Seats[0], r = d.Range[0], p = d.Price[0], f = d["Fuel Consumption"][0];
-    const sp = d["Cruise Speed"][0], a = d["A-Check"][0], m = d["Maintenance Interval"][0];
-    const c = d["Crew Total"][0], co = d["CO2 Emission"][0];
-    const rw = d["Runway Required"][0], ceil = d["Service Ceiling"][0];
-    const eng = d["Engineers"][0], tech = d["Tech"][0];
-    const wingspan = d["Wingspan"][0], length = d["Length"][0];
+  const extremes = typeof calculateMinMax === "function" ? calculateMinMax(aircraftData) : {};
+  if (typeof calculateEfficiencyScore !== "function") {
+    console.error("calculateEfficiencyScore is not defined or not loaded");
+    return;
+  }
+  const s1obj = typeof calculateEfficiencyScore === "function" ? calculateEfficiencyScore(d1, extremes) : {};
+  const s1 = Object.values(s1obj);
 
-    return [
-      p / (s * r) < 40 ? 10 : 8,
-      f / s < 1.5 ? 10 : 8,
-      sp > 600 ? 10 : 8,
-      a / m < 15 ? 10 : 8,
-      c <= 2 ? 10 : 6,
-      co <= 0.05 ? 10 : 8,
-      rw < 3000 ? 10 : 8,
-      ceil > 25000 ? 10 : 8,
-      eng <= 1 ? 10 : 8,
-      tech <= 1 ? 10 : 8,
-      wingspan <= 25 ? 10 : 8,
-      length <= 25 ? 10 : 8
-    ];
-  };
+  const s2obj = d2 ? calculateEfficiencyScore(d2, extremes) : null;
+  const s2 = s2obj ? Object.values(s2obj) : null;
 
-  const s1 = calcScore(d1);
-  const s2 = d2 ? calcScore(d2) : null;
-  const avg1 = (s1.reduce((a,b)=>a+b,0)/s1.length).toFixed(2);
-  const avg2 = s2 ? (s2.reduce((a,b)=>a+b,0)/s2.length).toFixed(2) : null;
+  // Weighted average calculation
+  const weights = Object.keys(s1obj).map(k => window.scoreParameters?.[k]?.weight || 1);
+  const avg1 = (Object.keys(s1obj).reduce((sum, key, i) => sum + s1obj[key] * weights[i], 0) / weights.reduce((a,b)=>a+b)).toFixed(2);
+  const avg2 = s2obj ? (Object.keys(s2obj).reduce((sum, key, i) => sum + s2obj[key] * weights[i], 0) / weights.reduce((a,b) => a + b)).toFixed(2) : null;
   document.getElementById("scoreBox").innerHTML = `🚀 ${translations.efficiency_score}: <strong>${avg1}</strong>/10` +
     (avg2 ? (avg1 > avg2 ? ` ↑ +${(avg1 - avg2).toFixed(2)}` : ` ↓ ${(avg2 - avg1).toFixed(2)}`) : "");
 
@@ -130,6 +133,7 @@ function drawChart(d1, d2) {
     fuel_consumption: translations.fuel_consumption || "Fuel",
     cruise_speed: translations.cruise_speed || "Speed",
     a_check: translations.a_check || "A-Check",
+    maintenance_interval: translations.maintenance_interval || "Maint. Int.",
     crew_total: translations.crew_total || "Crew",
     co2_emission: translations.co2_emission || "CO₂",
     runway_required: translations.runway_required || "Runway",
@@ -140,24 +144,26 @@ function drawChart(d1, d2) {
     length: translations.length || "Length"
   };
 
-  const scoreIndexMap = {
-    price: 0,
-    fuel_consumption: 1,
-    cruise_speed: 2,
-    a_check: 3,
-    crew_total: 4,
-    co2_emission: 5,
-    runway_required: 6,
-    service_ceiling: 7,
-    engineers: 8,
-    tech: 9,
-    wingspan: 10,
-    length: 11
+  const labels = selectedRadarKeys.map(k => paramLabels[k]);
+
+  const radarKeyToScoreKey = {
+    price: "Price",
+    fuel_consumption: "Fuel Consumption",
+    cruise_speed: "Cruise Speed",
+    a_check: "A-Check",
+    maintenance_interval: "Maintenance Interval",
+    crew_total: "Crew Total",
+    co2_emission: "CO2 Emission",
+    runway_required: "Runway Required",
+    service_ceiling: "Service Ceiling",
+    engineers: "Engineers",
+    tech: "Tech",
+    wingspan: "Wingspan",
+    length: "Length"
   };
 
-  const labels = selectedRadarKeys.map(k => paramLabels[k]);
-  const s1data = selectedRadarKeys.map(k => s1[scoreIndexMap[k]]);
-  const s2data = s2 ? selectedRadarKeys.map(k => s2[scoreIndexMap[k]]) : null;
+  const s1data = selectedRadarKeys.map(k => s1obj[radarKeyToScoreKey[k]]);
+  const s2data = s2obj ? selectedRadarKeys.map(k => s2obj[radarKeyToScoreKey[k]]) : null;
 
   window.radar = new Chart(ctx, {
     type: "radar",
@@ -186,6 +192,9 @@ function drawChart(d1, d2) {
   });
 }
 
+// === Theme Toggle ===
+
+// Switch between light and dark mode, updating button text accordingly
 function toggleMode() {
   const body = document.body;
   const modeButton = document.getElementById("modeButton");
@@ -201,12 +210,21 @@ function toggleMode() {
   }
 }
 
+// === Window Load Event ===
+
+// On window load, initialize dropdowns, update data display, and set event listeners for UI interactions
 window.onload = function () {
   populateDropdowns();
   updateData();
-  document.getElementById("aircraft1").addEventListener("change", updateData);
-  document.getElementById("aircraft2").addEventListener("change", updateData);
-  document.getElementById("modeButton").addEventListener("click", toggleMode);
+  const aircraft1 = document.getElementById("aircraft1");
+  const aircraft2 = document.getElementById("aircraft2");
+  const modeBtn = document.getElementById("modeButton");
+  const germanFormatToggle = document.getElementById("useGermanFormat");
+
+  if (aircraft1) aircraft1.addEventListener("change", updateData);
+  if (aircraft2) aircraft2.addEventListener("change", updateData);
+  if (modeBtn) modeBtn.addEventListener("click", toggleMode);
+  if (germanFormatToggle) germanFormatToggle.addEventListener("change", updateData);
 };
 
 window.radar = null;

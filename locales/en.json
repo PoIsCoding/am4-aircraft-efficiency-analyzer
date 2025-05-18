@@ -1,5 +1,4 @@
 {
-  "footer_disclaimer": "This is an unofficial fan-made project. It is not affiliated with or endorsed by the original game or its rights holders. All trademarks, logos, and images are the property of their respective owners and are used solely for non-commercial, informational purposes.",
   "title": "Aircraft Efficiency Analyzer",
   "primary_aircraft": "✈️ Primary Aircraft",
   "compare_aircraft": "🔁 Compare Aircraft",
@@ -22,8 +21,13 @@
   "tech": "Tech",
   "wingspan": "Wingspan",
   "length": "Length",
-  "footer_language_note": "Language applies only to this page",
-  "footer_note": "© Poramet Bahnschulte (PoIsCoding) – Fan-made project for comparing aircraft in Airline Manager. Contact: poramet.coding@gmail.com",
+  "label_german_format": "Use German number format (1.000,12)",
+  "label_show_compare": "Show comparison values in table",
+  "label_radar_chart": "Radar Chart Parameters:",
+  "label_support": "Support the project:",
+  "donation_link": "☕ Buy me a coffee",
+  "primary": "Primary",
+  "compare": "Compare",
   "units": {
     "price": "USD",
     "seats": "passengers",
@@ -41,11 +45,6 @@
     "wingspan": "m",
     "length": "m"
   },
-  "primary": "Primary",
-  "compare": "Compare",
-  "label_german_format": "Use German number format (1.000,12)",
-  "label_show_compare": "Show comparison values in table",
-  "label_radar_chart": "Radar Chart Parameters:",
-  "label_support": "Support the project:",
-  "donation_link": "☕ Buy me a coffee"
+  "footer_disclaimer": "This is an unofficial fan-made project. It is not affiliated with or endorsed by the original game or its rights holders. All trademarks, logos, and images are the property of their respective owners and are used solely for non-commercial, informational purposes.",
+  "footer_note": "© Poramet Bahnschulte (PoIsCoding) – Fan-made project for comparing aircraft in Airline Manager. Contact: poramet.coding@gmail.com"
 }
