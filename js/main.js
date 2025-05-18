@@ -78,7 +78,8 @@ function updateData() {
     }
     const showCompare = document.getElementById("showCompareValues")?.checked;
     const compareText = showCompare && v2 !== null ? `<br><span style="color: #aaa;">${formatNumber(v2)}</span>` : "";
-    table.innerHTML += `<tr><td data-label-key="${keyLabel}">${key}</td><td>${formatNumber(v1)}${compareText}${diff}</td><td>${unit}</td></tr>`;
+    const labelText = translations[keyLabel] || key;
+    table.innerHTML += `<tr><td data-label-key="${keyLabel}">${labelText}</td><td>${formatNumber(v1)}${compareText}${diff}</td><td>${unit}</td></tr>`;
   }
 
   drawChart(d1, d2);
@@ -113,7 +114,7 @@ function drawChart(d1, d2) {
   const s2 = d2 ? calcScore(d2) : null;
   const avg1 = (s1.reduce((a,b)=>a+b,0)/s1.length).toFixed(2);
   const avg2 = s2 ? (s2.reduce((a,b)=>a+b,0)/s2.length).toFixed(2) : null;
-  document.getElementById("scoreBox").innerHTML = `🚀 Efficiency Score: <strong>${avg1}</strong>/10` +
+  document.getElementById("scoreBox").innerHTML = `🚀 ${translations.efficiency_score}: <strong>${avg1}</strong>/10` +
     (avg2 ? (avg1 > avg2 ? ` ↑ +${(avg1 - avg2).toFixed(2)}` : ` ↓ ${(avg2 - avg1).toFixed(2)}`) : "");
 
   const ctx = document.getElementById("efficiencyChart").getContext("2d");

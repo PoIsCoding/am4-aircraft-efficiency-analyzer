@@ -22,7 +22,15 @@
       document.getElementById('title').textContent = translations.title;
       document.getElementById('labelPrimary').textContent = translations.primary_aircraft;
       document.getElementById('labelCompare').textContent = translations.compare_aircraft;
-      document.getElementById('scoreBox').textContent = translations.efficiency_score + ": -- / 10";
+      const scoreBox = document.getElementById('scoreBox');
+      if (scoreBox) {
+        // Preserve inner HTML tags and only update the label part
+        const scoreHTML = scoreBox.innerHTML;
+        const valueMatch = scoreHTML.match(/<strong>(.*?)<\/strong>/);
+        const value = valueMatch ? valueMatch[1] : "--";
+        const suffix = scoreHTML.includes("↑") ? scoreHTML.split("</strong>")[1] : "";
+        scoreBox.innerHTML = `🚀 ${translations.efficiency_score}: <strong>${value}</strong>${suffix}`;
+      }
       document.getElementById('thParameter').textContent = translations.table_parameter;
       document.getElementById('thValue').textContent = translations.table_value;
       document.getElementById('thUnit').textContent = translations.table_unit;
