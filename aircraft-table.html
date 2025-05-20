@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html id="htmlTag" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aircraft Overview Table</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    
+  </style>
+</head>
+<body class="light-mode">
+  <div class="container">
+    <a href="index.html" style="display: inline-block; margin-bottom: 1rem;">🔙 Back to Comparison</a>
+    <h1>Aircraft Overview Table</h1>
+    <div class="table-scroll-wrapper" style="overflow-x: auto; max-width: 100%;">
+      <table style="min-width: 1000px;">
+        <thead>
+          <tr>
+            <th style="position: sticky; left: 0; background: white; z-index: 1;">Name</th>
+            <th style="text-align: right;">Price</th>
+            <th style="text-align: right;">Seats</th>
+            <th style="text-align: right;">Range</th>
+            <th style="text-align: right;">Cruise Speed</th>
+            <th style="text-align: right;">Fuel Consumption</th>
+            <th style="text-align: right;">A-Check</th>
+            <th style="text-align: right;">Maintenance Interval</th>
+            <th style="text-align: right;">CO2 Emission</th>
+            <th style="text-align: right;">Crew Total</th>
+            <th style="text-align: right;">Engineers</th>
+            <th style="text-align: right;">Tech</th>
+            <th style="text-align: right;">Runway Required</th>
+            <th style="text-align: right;">Service Ceiling</th>
+            <th style="text-align: right;">Wingspan</th>
+            <th style="text-align: right;">Length</th>
+            <th style="text-align: right;">Efficiency Score</th>
+          </tr>
+        </thead>
+        <tbody id="aircraftTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="./js/aircraftList.js"></script>
+  <script src="./js/aircraftData.js"></script>
+  <script src="./js/efficiencyScore.js"></script>
+  <script src="./js/scoringUtils.js"></script>
+  <script>
+    window.onload = function () {
+      const lang = localStorage.getItem('language') || 'en';
+      const useGermanFormat = localStorage.getItem("useGermanFormat") === "true";
+      const formatter = new Intl.NumberFormat(useGermanFormat ? "de-DE" : "en-US");
+
+      const tableBody = document.getElementById("aircraftTableBody");
+      const aircraftNames = Object.fromEntries(aircraftList.map(ac => [ac.id, ac.name]));
+
+      const extremes = calculateMinMax(aircraftData);
+
+      for (const id in aircraftData) {
+        const data = aircraftData[id];
+        const scoreObj = calculateEfficiencyScore(data, extremes);
+        const weights = Object.keys(scoreObj).map(k => scoreParameters[k]?.weight || 1);
+        const score = (
+          Object.keys(scoreObj).reduce((sum, key, i) => sum + scoreObj[key] * weights[i], 0)
+          / weights.reduce((a,b) => a + b)
+        ).toFixed(2);
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td style="position: sticky; left: 0; background: white; z-index: 1; text-align: left;">${aircraftNames[id] || id}</td>
+          <td style="text-align: right;">${data["Price"] ? formatter.format(data["Price"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Seats"] ? formatter.format(data["Seats"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Range"] ? formatter.format(data["Range"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Cruise Speed"] ? formatter.format(data["Cruise Speed"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Fuel Consumption"] ? formatter.format(data["Fuel Consumption"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["A-Check"] ? formatter.format(data["A-Check"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Maintenance Interval"] ? formatter.format(data["Maintenance Interval"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["CO2 Emission"] ? formatter.format(data["CO2 Emission"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Crew Total"] ? formatter.format(data["Crew Total"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Engineers"] ? formatter.format(data["Engineers"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Tech"] ? formatter.format(data["Tech"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Runway Required"] ? formatter.format(data["Runway Required"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Service Ceiling"] ? formatter.format(data["Service Ceiling"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Wingspan"] ? formatter.format(data["Wingspan"][0]) : "-"}</td>
+          <td style="text-align: right;">${data["Length"] ? formatter.format(data["Length"][0]) : "-"}</td>
+          <td style="text-align: right;">${score}</td>
+        `;
+        tableBody.appendChild(row);
+      }
+
+      // Sortierfunktion
+      document.querySelectorAll("th").forEach(header => {
+        header.addEventListener("click", () => {
+          const index = Array.from(header.parentNode.children).indexOf(header);
+          const rows = Array.from(tableBody.querySelectorAll("tr"));
+          const ascending = !header.classList.contains("asc");
+
+          rows.sort((a, b) => {
+            const val1 = a.children[index].textContent.replace(/[^0-9.]/g, "");
+            const val2 = b.children[index].textContent.replace(/[^0-9.]/g, "");
+            return ascending ? val1 - val2 : val2 - val1;
+          });
+
+          document.querySelectorAll("th").forEach(th => th.classList.remove("asc", "desc"));
+          header.classList.add(ascending ? "asc" : "desc");
+          rows.forEach(row => tableBody.appendChild(row));
+        });
+      });
+    };
+  </script>
+  <script>
+    // Load stored language or default to 'en'
+    const lang = localStorage.getItem('language') || 'en';
+    localStorage.setItem('language', lang);
+    document.getElementById('htmlTag').setAttribute('lang', lang);
+
+    // Fetch and apply translations
+    fetch(`./locales/${lang}.json`)
+      .then(res => res.json())
+      .then(translations => {
+        document.title = translations.title || document.title;
+        document.querySelector('h1').textContent = translations.title || 'Aircraft Overview Table';
+
+        const ths = document.querySelectorAll('thead th');
+        if (ths.length >= 17) {
+          ths[0].textContent = translations.name;
+          ths[0].title = translations.name;
+          ths[1].textContent = translations.price;
+          ths[1].title = translations.price;
+          ths[2].textContent = translations.seats;
+          ths[2].title = translations.seats;
+          ths[3].textContent = translations.range;
+          ths[3].title = translations.range;
+          ths[4].textContent = translations.cruise_speed;
+          ths[4].title = translations.cruise_speed;
+          ths[5].textContent = translations.fuel_consumption;
+          ths[5].title = translations.fuel_consumption;
+          ths[6].textContent = translations.a_check;
+          ths[6].title = translations.a_check;
+          ths[7].textContent = translations.maintenance_interval;
+          ths[7].title = translations.maintenance_interval;
+          ths[8].textContent = translations.co2_emission;
+          ths[8].title = translations.co2_emission;
+          ths[9].textContent = translations.crew_total;
+          ths[9].title = translations.crew_total;
+          ths[10].textContent = translations.engineers;
+          ths[10].title = translations.engineers;
+          ths[11].textContent = translations.tech;
+          ths[11].title = translations.tech;
+          ths[12].textContent = translations.runway_required;
+          ths[12].title = translations.runway_required;
+          ths[13].textContent = translations.service_ceiling;
+          ths[13].title = translations.service_ceiling;
+          ths[14].textContent = translations.wingspan;
+          ths[14].title = translations.wingspan;
+          ths[15].textContent = translations.length;
+          ths[15].title = translations.length;
+          ths[16].textContent = translations.efficiency_score;
+          ths[16].title = translations.efficiency_score;
+        }
+
+        document.querySelector('a[href="index.html"]').textContent = lang === 'de' ? '🔙 Zurück zum Vergleich' : '🔙 Back to Comparison';
+      });
+  </script>
+</body>
+</html>

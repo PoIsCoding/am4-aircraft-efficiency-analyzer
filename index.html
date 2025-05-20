@@ -17,6 +17,7 @@
      * @param {string} lang - Language code to set (e.g., 'en', 'de').
      */
     async function setLanguage(lang) {
+      localStorage.setItem('language', lang); // Save to localStorage
       const response = await fetch(`./locales/${lang}.json`);
       translations = await response.json();
       currentLang = lang;
@@ -103,19 +104,18 @@
       if (typeof updateData === "function") {
         updateData();
       }
+      
+      const viewTableLink = document.getElementById('viewTableLink');
+      if (viewTableLink && translations.view_table) {
+        viewTableLink.innerHTML = translations.view_table;
+      }
     }
 
     // Initialize event listeners and default language on DOM content loaded
     document.addEventListener("DOMContentLoaded", () => {
-      // Null check for footerNote before language set (in case it's not present)
-      if (document.getElementById('footerNote')) {
-        // placeholder, no-op, just to satisfy the instruction
-      }
+      const storedLang = localStorage.getItem("language") || "en";
+      setLanguage(storedLang);
 
-      // Set default language to English
-      setLanguage('en');
-
-      // Settings button toggles the visibility of the settings menu
       const btn = document.getElementById("settingsBtn");
       const menu = document.getElementById("settingsMenu");
       btn.addEventListener("click", () => {
@@ -187,6 +187,7 @@
     <h1 id="title">Aircraft Efficiency Analyzer</h1>
 
     <!-- Dropdown Selection for Aircraft -->
+    <a id="viewTableLink" href="aircraft-table.html" style="display: inline-block; margin-bottom: 1rem;">📊 View Full Aircraft Table</a>
     <div class="dropdown-row">
       <div class="dropdown-column">
         <label for="aircraft1" class="dropdown-label" id="labelPrimary">✈️ Primary Aircraft</label>

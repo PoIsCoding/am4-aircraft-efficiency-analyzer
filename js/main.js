@@ -215,7 +215,25 @@ function toggleMode() {
 // On window load, initialize dropdowns, update data display, and set event listeners for UI interactions
 window.onload = function () {
   populateDropdowns();
+
+  // Restore radar checkbox states from localStorage
+  const savedRadar = JSON.parse(localStorage.getItem("selectedRadarParams") || "[]");
+  document.querySelectorAll(".radar-toggle").forEach(cb => {
+    cb.checked = savedRadar.includes(cb.value);
+  });
+
+  // Restore useGermanFormat state from localStorage
+  const savedFormat = localStorage.getItem("useGermanFormat") === "true";
+  const formatToggle = document.getElementById("useGermanFormat");
+  if (formatToggle) formatToggle.checked = savedFormat;
+
+  // Restore showCompareValues state from localStorage
+  const savedCompare = localStorage.getItem("showCompareValues") === "true";
+  const compareToggle = document.getElementById("showCompareValues");
+  if (compareToggle) compareToggle.checked = savedCompare;
+
   updateData();
+
   const aircraft1 = document.getElementById("aircraft1");
   const aircraft2 = document.getElementById("aircraft2");
   const modeBtn = document.getElementById("modeButton");
@@ -224,7 +242,31 @@ window.onload = function () {
   if (aircraft1) aircraft1.addEventListener("change", updateData);
   if (aircraft2) aircraft2.addEventListener("change", updateData);
   if (modeBtn) modeBtn.addEventListener("click", toggleMode);
-  if (germanFormatToggle) germanFormatToggle.addEventListener("change", updateData);
+  if (germanFormatToggle) {
+    germanFormatToggle.addEventListener("change", (e) => {
+      localStorage.setItem("useGermanFormat", e.target.checked);
+      updateData();
+    });
+  }
+
+  // Add listener for showCompareValues checkbox to store its state
+  if (compareToggle) {
+    compareToggle.addEventListener("change", (e) => {
+      localStorage.setItem("showCompareValues", e.target.checked);
+      updateData();
+    });
+  }
+
+  // Radar toggles: store user selection in localStorage and update
+  document.querySelectorAll(".radar-toggle").forEach(toggle => {
+    toggle.addEventListener("change", () => {
+      const selectedRadar = Array.from(document.querySelectorAll(".radar-toggle"))
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+      localStorage.setItem("selectedRadarParams", JSON.stringify(selectedRadar));
+      updateData();
+    });
+  });
 };
 
 window.radar = null;

@@ -276,3 +276,57 @@ th, td {
 .settings-menu.hidden {
   display: none;
 }
+
+
+/* === table styles === */
+table th {
+  cursor: pointer;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+th.asc::after {
+  content: " 🔼";
+}
+th.desc::after {
+  content: " 🔽";
+}
+td {
+  text-align: right;
+}
+th {
+  hyphens: auto;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+table th,
+table td {
+  width: 10ch;
+  max-width: 10ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+th {
+  hyphens: auto;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+
+/* Sticky first column in tables */
+td:first-child,
+th:first-child {
+  position: sticky;
+  left: 0;
+  background: white;
+  z-index: 2;
+  text-align: left;
+  min-width: 200px;
+  max-width: 300px;
+  white-space: normal;
+  word-break: break-word;
+}

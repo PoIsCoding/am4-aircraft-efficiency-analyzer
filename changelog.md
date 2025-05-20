@@ -1,3 +1,18 @@
+## [1.2.0] - 2025-05-20
+
+### Added
+- New aircraft overview table with sortable columns and all aircraft parameters.
+- Option to switch between languages via JSON-based translations.
+- User settings (language, radar parameters, formatting) now persist in localStorage.
+- Efficiency Score now displayed directly in aircraft table.
+- Scrollable table layout with sticky first column and responsive design.
+- Tooltips for column headers showing full parameter names.
+
+### Changed
+- Improved column alignment and consistent number formatting based on user locale.
+- Auto-wrapping and hyphenation enabled for long table headers.
+- Visual enhancements to keep layout readable across devices.
+
 ## [1.1.1] - 2025-05-18
 
 ### Added
