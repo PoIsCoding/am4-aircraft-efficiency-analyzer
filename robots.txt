@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://poiscoding.github.io/am4-aircraft-efficiency-analyzer/sitemap.xml
