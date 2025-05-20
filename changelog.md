@@ -1,3 +1,10 @@
+## [1.2.1] - 2025-05-20
+
+### Added
+- Reset button in settings to clear all saved localStorage preferences.
+- Default activation of all radar chart checkboxes on first page load.
+- Persistent localStorage saving for radar checkbox state.
+
 ## [1.2.0] - 2025-05-20
 
 ### Added

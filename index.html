@@ -116,6 +116,12 @@
       const storedLang = localStorage.getItem("language") || "en";
       setLanguage(storedLang);
 
+      // Set default radar parameters on first visit
+      if (!localStorage.getItem("selectedRadarParams")) {
+        const allRadarValues = Array.from(document.querySelectorAll(".radar-toggle")).map(el => el.value);
+        localStorage.setItem("selectedRadarParams", JSON.stringify(allRadarValues));
+      }
+
       const btn = document.getElementById("settingsBtn");
       const menu = document.getElementById("settingsMenu");
       btn.addEventListener("click", () => {
@@ -179,6 +185,11 @@
           </a>
         </div>
 
+        <!-- Reset Settings -->
+        <div class="reset-settings" style="margin-top: 1rem;">
+          <button onclick="resetLocalStorage()" style="font-size: 0.85rem; padding: 4px 8px;">🗑️ Reset all settings</button>
+        </div>
+
       </div>
     </div>
 
@@ -231,6 +242,13 @@
   <script src="./js/scoringUtils.js"></script>
   <script src="./js/efficiencyScore.js"></script>
   <script src="./js/main.js"></script>
+
+  <script>
+    function resetLocalStorage() {
+      localStorage.clear();
+      location.reload();
+    }
+  </script>
 
   <!-- Footer with Language and Disclaimer Notes -->
   <footer class="language-footer">
