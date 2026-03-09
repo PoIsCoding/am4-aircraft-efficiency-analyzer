@@ -6,3 +6,6 @@
 
 # Ignoriere alle Logfiles
 *.log
+
+# Ignoriere Google Search Console HTML-Dateien
+googleb7ed851c14b7a710.html

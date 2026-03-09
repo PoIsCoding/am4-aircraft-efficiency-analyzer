@@ -1,165 +1,379 @@
 <!DOCTYPE html>
-<html id="htmlTag" lang="en">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Aircraft Overview Table</title>
-  <link rel="stylesheet" href="./styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AM4 Aircraft Overview Table</title>
+  <link rel="icon" href="images/icon.png" type="image/png" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
   <style>
-    
+    /* Zusätzliche Styles nur für die Übersichtstabelle */
+
+    /* Sortierbare Tabellenkopf-Zellen */
+    #aircraftTable th {
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+    }
+    #aircraftTable th:hover { color: #fff; }
+    #aircraftTable th.asc::after  { content: " ▲"; font-size: 0.7em; opacity: 0.7; }
+    #aircraftTable th.desc::after { content: " ▼"; font-size: 0.7em; opacity: 0.7; }
+
+    /* Score-Spalte farbig */
+    .score-high   { color: #00e676; font-weight: 600; }
+    .score-medium { color: #ffd32a; font-weight: 600; }
+    .score-low    { color: #ff4757; font-weight: 600; }
+
+    /* Zurück-Link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #00d4ff;
+      text-decoration: none;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid rgba(0,212,255,0.12);
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .back-link:hover {
+      background-color: rgba(0,212,255,0.12);
+      box-shadow: 0 0 12px rgba(0,212,255,0.3);
+    }
+
+    /* Filterzeile */
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .filter-row input[type="text"] {
+      flex: 1;
+      min-width: 200px;
+      background: var(--color-surface-2, #1c2535);
+      border: 1px solid var(--color-border, #2a3550);
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      color: #c8d6f0;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .filter-row input[type="text"]:focus { border-color: #00d4ff; }
+    .filter-row input[type="text"]::placeholder { color: #8899bb; }
+    body.light-mode .filter-row input[type="text"] { background: #e8edf8; color: #1a2040; border-color: #c8d4ea; }
+
+    /* Tabellen-Wrapper */
+    .overview-table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+      border: 1px solid var(--color-border, #2a3550);
+    }
+    #aircraftTable { min-width: 1100px; border: none; border-radius: 0; }
+
+    /* Zähler */
+    #rowCount {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.78rem;
+      color: #8899bb;
+    }
   </style>
 </head>
-<body class="light-mode">
+
+<body class="dark-mode">
   <div class="container">
-    <a href="index.html" style="display: inline-block; margin-bottom: 1rem;">🔙 Back to Comparison</a>
-    <h1>Aircraft Overview Table</h1>
-    <div class="table-scroll-wrapper" style="overflow-x: auto; max-width: 100%;">
-      <table style="min-width: 1000px;">
+
+    <!-- Zurück-Navigation -->
+    <a href="index.html" class="back-link">🔙 Back to Comparison</a>
+
+    <!-- Titel -->
+    <h1 id="tableTitle" style="margin-bottom: 1rem;">Aircraft Overview Table</h1>
+
+    <!-- Filter- und Anzahl-Zeile -->
+    <div class="filter-row">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="🔍 Filter aircraft..."
+        oninput="filterTable()"
+        aria-label="Filter aircraft by name"
+      />
+      <span id="rowCount"></span>
+    </div>
+
+    <!-- Scrollbare Tabelle -->
+    <div class="overview-table-wrapper">
+      <table id="aircraftTable">
         <thead>
           <tr>
-            <th style="position: sticky; left: 0; background: white; z-index: 1;">Name</th>
-            <th style="text-align: right;">Price</th>
-            <th style="text-align: right;">Seats</th>
-            <th style="text-align: right;">Range</th>
-            <th style="text-align: right;">Cruise Speed</th>
-            <th style="text-align: right;">Fuel Consumption</th>
-            <th style="text-align: right;">A-Check</th>
-            <th style="text-align: right;">Maintenance Interval</th>
-            <th style="text-align: right;">CO2 Emission</th>
-            <th style="text-align: right;">Crew Total</th>
-            <th style="text-align: right;">Engineers</th>
-            <th style="text-align: right;">Tech</th>
-            <th style="text-align: right;">Runway Required</th>
-            <th style="text-align: right;">Service Ceiling</th>
-            <th style="text-align: right;">Wingspan</th>
-            <th style="text-align: right;">Length</th>
-            <th style="text-align: right;">Efficiency Score</th>
+            <th onclick="sortTable('name')">Name</th>
+            <th onclick="sortTable('price')"          style="text-align:right;">Price</th>
+            <th onclick="sortTable('seats')"          style="text-align:right;">Seats</th>
+            <th onclick="sortTable('range')"          style="text-align:right;">Range</th>
+            <th onclick="sortTable('cruise_speed')"   style="text-align:right;">Cruise Speed</th>
+            <th onclick="sortTable('fuel')"           style="text-align:right;">Fuel/km</th>
+            <th onclick="sortTable('a_check')"        style="text-align:right;">A-Check</th>
+            <th onclick="sortTable('maint')"          style="text-align:right;">Maint. Interval</th>
+            <th onclick="sortTable('co2')"            style="text-align:right;">CO₂</th>
+            <th onclick="sortTable('crew')"           style="text-align:right;">Crew</th>
+            <th onclick="sortTable('engineers')"      style="text-align:right;">Engineers</th>
+            <th onclick="sortTable('tech')"           style="text-align:right;">Tech</th>
+            <th onclick="sortTable('runway')"         style="text-align:right;">Runway</th>
+            <th onclick="sortTable('ceiling')"        style="text-align:right;">Ceiling</th>
+            <th onclick="sortTable('wingspan')"       style="text-align:right;">Wingspan</th>
+            <th onclick="sortTable('length')"         style="text-align:right;">Length</th>
+            <th onclick="sortTable('score')"          style="text-align:right;">Score</th>
           </tr>
         </thead>
         <tbody id="aircraftTableBody"></tbody>
       </table>
     </div>
-  </div>
 
-  <script src="./js/aircraftList.js"></script>
-  <script src="./js/aircraftData.js"></script>
-  <script src="./js/efficiencyScore.js"></script>
-  <script src="./js/scoringUtils.js"></script>
+  </div><!-- /container -->
+
+  <!-- Footer -->
+  <footer class="language-footer">
+    <div id="footerNote"></div>
+  </footer>
+
+  <!-- JavaScript – Reihenfolge: Logger zuerst -->
+  <script src="js/logger.js"></script>
+  <script src="js/aircraftList.js"></script>
+  <script src="js/aircraftData.js"></script>
+  <script src="js/scoringUtils.js"></script>
+  <script src="js/efficiencyScore.js"></script>
+
   <script>
-    window.onload = function () {
-      const lang = localStorage.getItem('language') || 'en';
-      const useGermanFormat = localStorage.getItem("useGermanFormat") === "true";
-      const formatter = new Intl.NumberFormat(useGermanFormat ? "de-DE" : "en-US");
+    /**
+     * aircraft-table.html – Inline-Script
+     * ======================================
+     * Rendert die vollständige Flugzeugübersicht,
+     * ermöglicht Suche und Spalten-Sortierung.
+     */
 
-      const tableBody = document.getElementById("aircraftTableBody");
-      const aircraftNames = Object.fromEntries(aircraftList.map(ac => [ac.id, ac.name]));
+    // Zustand für Sortierung
+    let sortKey        = 'score';   // Standardmäßig nach Score sortiert
+    let sortAscending  = false;     // Absteigend (höchster Score zuerst)
+    let allRows        = [];        // Cache aller Tabellenzeilen
+    let translations   = {};        // Sprachübersetzungen
 
-      const extremes = calculateMinMax(aircraftData);
+    // ============================================================
+    // Tabelle befüllen
+    // ============================================================
 
+    /**
+     * Lädt alle Flugzeugdaten, berechnet Scores und rendert die Tabelle.
+     */
+    function buildTable() {
+      Logger.info('aircraft-table.html', 'Tabelle wird aufgebaut...');
+
+      const useGermanFormat = localStorage.getItem('useGermanFormat') === 'true';
+      const locale          = useGermanFormat ? 'de-DE' : 'en-US';
+      const formatter       = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
+
+      // Min/Max-Extremwerte berechnen (für Score-Normalisierung)
+      const extremes    = calculateMinMax(aircraftData);
+      const totalWeight = Object.values(scoreParameters).reduce((s, p) => s + p.weight, 0);
+
+      // Name-Lookup aufbauen
+      const nameMap = Object.fromEntries(aircraftList.map(ac => [ac.id, ac.name]));
+
+      allRows = [];
+
+      // Jeden Flugzeug-Eintrag verarbeiten
       for (const id in aircraftData) {
-        const data = aircraftData[id];
+        const data     = aircraftData[id];
         const scoreObj = calculateEfficiencyScore(data, extremes);
-        const weights = Object.keys(scoreObj).map(k => scoreParameters[k]?.weight || 1);
+
+        // Gewichteten Gesamt-Score berechnen
         const score = (
-          Object.keys(scoreObj).reduce((sum, key, i) => sum + scoreObj[key] * weights[i], 0)
-          / weights.reduce((a,b) => a + b)
+          Object.keys(scoreObj).reduce((sum, key) => {
+            return sum + scoreObj[key] * (scoreParameters[key]?.weight || 1);
+          }, 0) / totalWeight
         ).toFixed(2);
 
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td style="position: sticky; left: 0; background: white; z-index: 1; text-align: left;">${aircraftNames[id] || id}</td>
-          <td style="text-align: right;">${data["Price"] ? formatter.format(data["Price"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Seats"] ? formatter.format(data["Seats"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Range"] ? formatter.format(data["Range"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Cruise Speed"] ? formatter.format(data["Cruise Speed"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Fuel Consumption"] ? formatter.format(data["Fuel Consumption"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["A-Check"] ? formatter.format(data["A-Check"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Maintenance Interval"] ? formatter.format(data["Maintenance Interval"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["CO2 Emission"] ? formatter.format(data["CO2 Emission"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Crew Total"] ? formatter.format(data["Crew Total"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Engineers"] ? formatter.format(data["Engineers"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Tech"] ? formatter.format(data["Tech"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Runway Required"] ? formatter.format(data["Runway Required"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Service Ceiling"] ? formatter.format(data["Service Ceiling"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Wingspan"] ? formatter.format(data["Wingspan"][0]) : "-"}</td>
-          <td style="text-align: right;">${data["Length"] ? formatter.format(data["Length"][0]) : "-"}</td>
-          <td style="text-align: right;">${score}</td>
-        `;
-        tableBody.appendChild(row);
+        Logger.debug('aircraft-table.html', `Flugzeug "${id}" Score: ${score}`);
+
+        // Hilfsfunktion: Wert formatieren mit Fallback "–"
+        const fmt = (key) => data[key]?.[0] !== undefined ? formatter.format(data[key][0]) : '–';
+
+        // Score-Farbklasse
+        const scoreClass = score >= 7 ? 'score-high' : score >= 4 ? 'score-medium' : 'score-low';
+
+        // Zeile cachen (mit rohen Zahlen für Sortierung)
+        allRows.push({
+          id,
+          name:        nameMap[id] || id,
+          price:       data['Price']?.[0]                ?? 0,
+          seats:       data['Seats']?.[0]                ?? 0,
+          range:       data['Range']?.[0]                ?? 0,
+          cruise_speed:data['Cruise Speed']?.[0]         ?? 0,
+          fuel:        data['Fuel Consumption']?.[0]     ?? 0,
+          a_check:     data['A-Check']?.[0]              ?? 0,
+          maint:       data['Maintenance Interval']?.[0] ?? 0,
+          co2:         data['CO2 Emission']?.[0]         ?? 0,
+          crew:        data['Crew Total']?.[0]           ?? 0,
+          engineers:   data['Engineers']?.[0]            ?? 0,
+          tech:        data['Tech']?.[0]                 ?? 0,
+          runway:      data['Runway Required']?.[0]      ?? 0,
+          ceiling:     data['Service Ceiling']?.[0]      ?? 0,
+          wingspan:    data['Wingspan']?.[0]             ?? 0,
+          length:      data['Length']?.[0]               ?? 0,
+          score:       parseFloat(score),
+          // Vorformatierte HTML-Strings für schnelles Rendering
+          html: `
+            <td>${nameMap[id] || id}</td>
+            <td style="text-align:right;">${fmt('Price')}</td>
+            <td style="text-align:right;">${fmt('Seats')}</td>
+            <td style="text-align:right;">${fmt('Range')}</td>
+            <td style="text-align:right;">${fmt('Cruise Speed')}</td>
+            <td style="text-align:right;">${fmt('Fuel Consumption')}</td>
+            <td style="text-align:right;">${fmt('A-Check')}</td>
+            <td style="text-align:right;">${fmt('Maintenance Interval')}</td>
+            <td style="text-align:right;">${fmt('CO2 Emission')}</td>
+            <td style="text-align:right;">${fmt('Crew Total')}</td>
+            <td style="text-align:right;">${fmt('Engineers')}</td>
+            <td style="text-align:right;">${fmt('Tech')}</td>
+            <td style="text-align:right;">${fmt('Runway Required')}</td>
+            <td style="text-align:right;">${fmt('Service Ceiling')}</td>
+            <td style="text-align:right;">${fmt('Wingspan')}</td>
+            <td style="text-align:right;">${fmt('Length')}</td>
+            <td style="text-align:right;" class="${scoreClass}">${score}</td>
+          `
+        });
       }
 
-      // Sortierfunktion
-      document.querySelectorAll("th").forEach(header => {
-        header.addEventListener("click", () => {
-          const index = Array.from(header.parentNode.children).indexOf(header);
-          const rows = Array.from(tableBody.querySelectorAll("tr"));
-          const ascending = !header.classList.contains("asc");
+      Logger.info('aircraft-table.html', `${allRows.length} Flugzeuge geladen.`);
+      renderTable();
+    }
 
-          rows.sort((a, b) => {
-            const val1 = a.children[index].textContent.replace(/[^0-9.]/g, "");
-            const val2 = b.children[index].textContent.replace(/[^0-9.]/g, "");
-            return ascending ? val1 - val2 : val2 - val1;
-          });
+    // ============================================================
+    // Tabelle rendern (nach Filter + Sortierung)
+    // ============================================================
 
-          document.querySelectorAll("th").forEach(th => th.classList.remove("asc", "desc"));
-          header.classList.add(ascending ? "asc" : "desc");
-          rows.forEach(row => tableBody.appendChild(row));
-        });
+    /**
+     * Rendert die gefilterten und sortierten Zeilen in die Tabelle.
+     */
+    function renderTable() {
+      Logger.debug('aircraft-table.html', `renderTable() – Sort: "${sortKey}" ${sortAscending ? '▲' : '▼'}`);
+
+      const searchVal = (document.getElementById('searchInput')?.value || '').toLowerCase();
+
+      // Filter anwenden
+      let filtered = allRows.filter(row => row.name.toLowerCase().includes(searchVal));
+
+      // Sortieren
+      filtered.sort((a, b) => {
+        const vA = a[sortKey];
+        const vB = b[sortKey];
+        // Strings alphabetisch, Zahlen numerisch
+        if (typeof vA === 'string') return sortAscending ? vA.localeCompare(vB) : vB.localeCompare(vA);
+        return sortAscending ? vA - vB : vB - vA;
       });
+
+      // HTML rendern
+      const tbody = document.getElementById('aircraftTableBody');
+      tbody.innerHTML = filtered.map(row => `<tr>${row.html}</tr>`).join('');
+
+      // Zähler aktualisieren
+      const countEl = document.getElementById('rowCount');
+      if (countEl) countEl.textContent = `${filtered.length} aircraft`;
+
+      Logger.debug('aircraft-table.html', `${filtered.length} Zeilen gerendert.`);
+    }
+
+    // ============================================================
+    // Sortierung
+    // ============================================================
+
+    /**
+     * Sortiert die Tabelle nach einem Spalten-Key.
+     * Wechselt bei erneutem Klick die Richtung.
+     * @param {string} key - Datenschlüssel der Spalte
+     */
+    function sortTable(key) {
+      Logger.info('aircraft-table.html', `Sortiere nach: "${key}"`);
+
+      if (sortKey === key) {
+        sortAscending = !sortAscending;  // Richtung umkehren
+      } else {
+        sortKey       = key;
+        sortAscending = false;           // Neue Spalte: absteigend starten
+      }
+
+      // Sortier-Indikatoren auf allen Spaltenköpfen aktualisieren
+      document.querySelectorAll('#aircraftTable th').forEach(th => {
+        th.classList.remove('asc', 'desc');
+      });
+
+      // Sortiertes Spalten-Header markieren
+      const headers = document.querySelectorAll('#aircraftTable th');
+      const keyOrder = ['name','price','seats','range','cruise_speed','fuel','a_check','maint','co2','crew','engineers','tech','runway','ceiling','wingspan','length','score'];
+      const idx = keyOrder.indexOf(key);
+      if (idx >= 0 && headers[idx]) {
+        headers[idx].classList.add(sortAscending ? 'asc' : 'desc');
+      }
+
+      renderTable();
+    }
+
+    // ============================================================
+    // Suche / Filter
+    // ============================================================
+
+    /**
+     * Filtert die Tabelle nach dem eingegebenen Suchbegriff.
+     * Wird bei jeder Eingabe aufgerufen.
+     */
+    function filterTable() {
+      const val = document.getElementById('searchInput').value;
+      Logger.debug('aircraft-table.html', `Suche: "${val}"`);
+      renderTable();
+    }
+
+    // ============================================================
+    // Initialisierung bei Seitenaufruf
+    // ============================================================
+    window.onload = function () {
+      Logger.info('aircraft-table.html', 'Übersichtstabelle wird initialisiert...');
+
+      // Theme aus localStorage
+      const theme = localStorage.getItem('theme') || 'dark';
+      document.body.className = theme === 'light' ? 'light-mode' : 'dark-mode';
+
+      // Footer-Text laden (aus Übersetzungsdatei)
+      const lang = localStorage.getItem('language') || 'en';
+      fetch(`./locales/${lang}.json`)
+        .then(r => r.json())
+        .then(t => {
+          translations = t;
+          const fn = document.getElementById('footerNote');
+          if (fn) fn.textContent = t.footer_note || '';
+        })
+        .catch(err => Logger.warn('aircraft-table.html', 'Übersetzungen konnten nicht geladen werden:', err));
+
+      // Tabelle aufbauen
+      buildTable();
+
+      // Standard-Sortierung: Score (höchster zuerst) → Header markieren
+      const headers = document.querySelectorAll('#aircraftTable th');
+      if (headers[16]) headers[16].classList.add('desc');
+
+      Logger.info('aircraft-table.html', 'Initialisierung abgeschlossen.');
     };
-  </script>
-  <script>
-    // Load stored language or default to 'en'
-    const lang = localStorage.getItem('language') || 'en';
-    localStorage.setItem('language', lang);
-    document.getElementById('htmlTag').setAttribute('lang', lang);
-
-    // Fetch and apply translations
-    fetch(`./locales/${lang}.json`)
-      .then(res => res.json())
-      .then(translations => {
-        document.title = translations.title || document.title;
-        document.querySelector('h1').textContent = translations.title || 'Aircraft Overview Table';
-
-        const ths = document.querySelectorAll('thead th');
-        if (ths.length >= 17) {
-          ths[0].textContent = translations.name;
-          ths[0].title = translations.name;
-          ths[1].textContent = translations.price;
-          ths[1].title = translations.price;
-          ths[2].textContent = translations.seats;
-          ths[2].title = translations.seats;
-          ths[3].textContent = translations.range;
-          ths[3].title = translations.range;
-          ths[4].textContent = translations.cruise_speed;
-          ths[4].title = translations.cruise_speed;
-          ths[5].textContent = translations.fuel_consumption;
-          ths[5].title = translations.fuel_consumption;
-          ths[6].textContent = translations.a_check;
-          ths[6].title = translations.a_check;
-          ths[7].textContent = translations.maintenance_interval;
-          ths[7].title = translations.maintenance_interval;
-          ths[8].textContent = translations.co2_emission;
-          ths[8].title = translations.co2_emission;
-          ths[9].textContent = translations.crew_total;
-          ths[9].title = translations.crew_total;
-          ths[10].textContent = translations.engineers;
-          ths[10].title = translations.engineers;
-          ths[11].textContent = translations.tech;
-          ths[11].title = translations.tech;
-          ths[12].textContent = translations.runway_required;
-          ths[12].title = translations.runway_required;
-          ths[13].textContent = translations.service_ceiling;
-          ths[13].title = translations.service_ceiling;
-          ths[14].textContent = translations.wingspan;
-          ths[14].title = translations.wingspan;
-          ths[15].textContent = translations.length;
-          ths[15].title = translations.length;
-          ths[16].textContent = translations.efficiency_score;
-          ths[16].title = translations.efficiency_score;
-        }
-
-        document.querySelector('a[href="index.html"]').textContent = lang === 'de' ? '🔙 Zurück zum Vergleich' : '🔙 Back to Comparison';
-      });
   </script>
 </body>
 </html>

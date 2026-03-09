@@ -1,3 +1,29 @@
+## [2.0.0] - 2026-03-09
+
+### Added
+- `js/logger.js` – Zentrales Logging-Modul mit Zeitstempel, Log-Levels (DEBUG, INFO, WARN, ERROR) und farbiger Konsolen-Ausgabe. Alle Module nutzen nun `Logger.info()` / `Logger.debug()` etc.
+- Inline-Suche / Filter in `aircraft-table.html` für schnelles Filtern nach Flugzeugnamen.
+- Score-Farbkodierung in der Übersichtstabelle (grün / gelb / rot je nach Score).
+- Automatisches Schließen des Settings-Menüs bei Klick außerhalb.
+- Theme-Präferenz (Light/Dark) wird nun in localStorage gespeichert und beim nächsten Aufruf wiederhergestellt.
+- Zähleranzeige ("X aircraft") in der Übersichtstabelle.
+- `aria-label`-Attribute für Dropdowns (Barrierefreiheit).
+
+### Changed
+- **Komplettes Redesign** mit aviation-inspiriertem Dark-Mode (Cockpit-Display-Ästhetik, Cyan-Akzente, Raster-Hintergrund).
+- Neue Schriftarten: `Rajdhani` (Display/UI) + `IBM Plex Mono` (Datenwerte) statt generischer Systemfonts.
+- CSS vollständig auf CSS Custom Properties (Design-Tokens) umgestellt – einfachere Theme-Anpassung.
+- Alle JS-Dateien mit vollständigen JSDoc-Kommentaren und Logger-Aufrufen versehen.
+- `index.html` bereinigt: Script-Tags ans Dateiende, Lade-Reihenfolge dokumentiert.
+- `aircraft-table.html` komplett neu geschrieben mit Inline-Sortierung und Suchfeld.
+- Radar-Chart: verbessertes Farbschema, Punkt-Marker, animations-optimiert.
+- Score-Box mit grünem/rotem Differenz-Indikator je nach Vergleichsergebnis.
+- Light-Mode vollständig überarbeitet (konsistente CSS-Variable-Nutzung).
+
+### Fixed
+- Scores werden bei 0–10 geclipped (verhindert Rundungsartefakte außerhalb der Skala).
+- `aircraft-table.html` hatte hart kodiertes `background: white` in `<th>` – jetzt über CSS-Variablen.
+- Settings-Menü ließ sich nicht durch Außenklick schließen.
 ## [1.2.2] - 2025-05-20
 
 ### Added

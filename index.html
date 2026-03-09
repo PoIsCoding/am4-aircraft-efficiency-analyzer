@@ -3,268 +3,303 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Compare aircraft efficiency, fuel usage, crew needs, and more. Interactive radar chart and sortable aircraft table.">
-  <meta property="og:title" content="Airline Manger 4 Efficiency Analyzer" />
+  <meta name="description" content="Compare aircraft efficiency, fuel usage, crew needs, and more. Interactive radar chart and sortable aircraft table for Airline Manager 4." />
+  <meta property="og:title"       content="AM4 Aircraft Efficiency Analyzer" />
   <meta property="og:description" content="Compare and evaluate aircraft performance visually." />
-  <!-- <meta property="og:image" content="https://deinlink.de/header.jpg" />
-  <meta property="og:url" content="https://deineurl.de" /> -->
   <meta name="google-site-verification" content="OebpSrpdOOnlX1MwLxe4LWUMGTrTNdWLM9lb52rY8VM" />
-  <title>Aircraft Efficiency Analyzer</title>
-  <link rel="icon" href="./images/icon.png" type="image/jpeg" />
-  <link rel="stylesheet" href="./styles.css" />
+  <title>AM4 Aircraft Efficiency Analyzer</title>
+  <link rel="icon" href="images/icon.png" type="image/png" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Google Fonts: Rajdhani + IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Chart.js für Radar-Chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <script>
-    // Translation data and current language state
+    /**
+     * i18n – Sprachverwaltung
+     * ========================
+     * Lädt Übersetzungen aus JSON-Dateien im /locales/-Ordner
+     * und wendet sie auf alle UI-Elemente an.
+     */
+
+    // Aktuelle Übersetzungsdaten (global)
     let translations = {};
-    let currentLang = 'en';
+    let currentLang  = 'en';
 
     /**
-     * Fetches and sets the language translations.
-     * @param {string} lang - Language code to set (e.g., 'en', 'de').
+     * Lädt und aktiviert eine Sprache.
+     * Speichert die Auswahl in localStorage für nachfolgende Besuche.
+     * @param {string} lang - Sprachcode z.B. 'en' oder 'de'
      */
     async function setLanguage(lang) {
-      localStorage.setItem('language', lang); // Save to localStorage
-      const response = await fetch(`./locales/${lang}.json`);
-      translations = await response.json();
-      currentLang = lang;
-      applyTranslations();
+      Logger.info('index.html', `Sprache wird geladen: "${lang}"`);
+      try {
+        const response = await fetch(`./locales/${lang}.json`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        translations = await response.json();
+        currentLang  = lang;
+        localStorage.setItem('language', lang);
+        applyTranslations();
+        Logger.info('index.html', `Sprache erfolgreich gesetzt: "${lang}"`);
+      } catch (err) {
+        Logger.error('index.html', `Fehler beim Laden der Sprache "${lang}":`, err);
+      }
     }
 
     /**
-     * Applies the loaded translations to all relevant UI elements.
-     * Updates text content and preserves certain inner HTML structures.
+     * Überträgt die geladenen Übersetzungen auf alle UI-Elemente.
+     * Aktualisiert anschließend Tabelle und Chart.
      */
     function applyTranslations() {
-      // Update main title
-      document.getElementById('title').textContent = translations.title;
+      Logger.debug('index.html', 'applyTranslations() wird ausgeführt...');
 
-      // Update labels for aircraft selection
-      document.getElementById('labelPrimary').textContent = translations.primary_aircraft;
-      document.getElementById('labelCompare').textContent = translations.compare_aircraft;
+      // Haupttitel
+      const titleEl = document.getElementById('title');
+      if (titleEl) titleEl.textContent = translations.title || 'Aircraft Efficiency Analyzer';
 
-      // Update efficiency score box, preserving inner HTML structure and suffix
-      const scoreBox = document.getElementById('scoreBox');
-      if (scoreBox) {
-        const scoreHTML = scoreBox.innerHTML;
-        const valueMatch = scoreHTML.match(/<strong>(.*?)<\/strong>/);
-        const value = valueMatch ? valueMatch[1] : "--";
-        const suffix = scoreHTML.includes("↑") ? scoreHTML.split("</strong>")[1] : "";
-        scoreBox.innerHTML = `🚀 ${translations.efficiency_score}: <strong>${value}</strong>${suffix}`;
-      }
+      // Dropdown-Labels
+      const labelPrimary = document.getElementById('labelPrimary');
+      const labelCompare = document.getElementById('labelCompare');
+      if (labelPrimary) labelPrimary.textContent = translations.primary_aircraft || '✈️ Primary Aircraft';
+      if (labelCompare) labelCompare.textContent = translations.compare_aircraft || '🔁 Compare Aircraft';
 
-      // Update table headers
-      document.getElementById('thParameter').textContent = translations.table_parameter;
-      document.getElementById('thValue').textContent = translations.table_value;
-      document.getElementById('thUnit').textContent = translations.table_unit;
+      // Tabellenkopf
+      const thParam = document.getElementById('thParameter');
+      const thVal   = document.getElementById('thValue');
+      const thUnit  = document.getElementById('thUnit');
+      if (thParam) thParam.textContent = translations.table_parameter || 'Parameter';
+      if (thVal)   thVal.textContent   = translations.table_value     || 'Value';
+      if (thUnit)  thUnit.textContent  = translations.table_unit      || 'Unit';
 
-      // Update footer notes if present
-      if (document.getElementById('languageNote')) {
-        document.getElementById('languageNote').textContent = translations.footer_language_note;
-      }
-      if (document.getElementById('footerNote')) {
-        document.getElementById('footerNote').textContent = translations.footer_note;
-      }
-      if (document.getElementById('footerDisclaimer')) {
-        document.getElementById('footerDisclaimer').textContent = translations.footer_disclaimer;
-      }
+      // Footer-Texte
+      const footerNote       = document.getElementById('footerNote');
+      const footerDisclaimer = document.getElementById('footerDisclaimer');
+      if (footerNote)       footerNote.textContent       = translations.footer_note       || '';
+      if (footerDisclaimer) footerDisclaimer.textContent = translations.footer_disclaimer || '';
 
-      // Update settings menu labels
-      if (document.getElementById('labelGermanFormat')) {
-        document.getElementById('labelGermanFormat').textContent = translations.label_german_format;
-      }
-      if (document.getElementById('labelShowCompare')) {
-        document.getElementById('labelShowCompare').textContent = translations.label_show_compare;
-      }
-      if (document.getElementById('labelRadarChart')) {
-        document.getElementById('labelRadarChart').textContent = translations.label_radar_chart;
-      }
-      if (document.getElementById('labelSupport')) {
-        document.getElementById('labelSupport').textContent = translations.label_support;
-      }
+      // Settings-Menü Beschriftungen
+      const labelGerman  = document.getElementById('labelGermanFormat');
+      const labelShowCmp = document.getElementById('labelShowCompare');
+      const labelRadar   = document.getElementById('labelRadarChart');
+      const labelSupport = document.getElementById('labelSupport');
+      if (labelGerman)  labelGerman.textContent  = translations.label_german_format || 'Use German number format';
+      if (labelShowCmp) labelShowCmp.textContent = translations.label_show_compare   || 'Show comparison values';
+      if (labelRadar)   labelRadar.textContent   = translations.label_radar_chart    || 'Radar Chart Parameters:';
+      if (labelSupport) labelSupport.textContent = translations.label_support        || 'Support the project:';
 
-      // Update donation link text with fallback
-      if (document.getElementById('donationLinkText')) {
-        document.getElementById('donationLinkText').textContent = translations.donation_link || "☕ Buy me a coffee";
-      }
+      // Spenden-Link
+      const donationText = document.getElementById('donationLinkText');
+      if (donationText) donationText.textContent = translations.donation_link || '☕ Buy me a coffee';
 
-      // Update any elements with data-label-key attribute dynamically
+      // Tabellen-Link
+      const viewLink = document.getElementById('viewTableLink');
+      if (viewLink && translations.view_table) viewLink.innerHTML = translations.view_table;
+
+      // Radar-Toggle Labels dynamisch übersetzen
+      document.querySelectorAll('.radar-toggle').forEach(el => {
+        const key   = el.value.toLowerCase();
+        const label = translations[key] || el.value;
+        // Nextsibling ist der Text-Node nach der Checkbox
+        if (el.nextSibling) el.nextSibling.textContent = ` ${label}`;
+      });
+
+      // Alle Elemente mit data-label-key Attribut übersetzen
       document.querySelectorAll('[data-label-key]').forEach(el => {
         const key = el.getAttribute('data-label-key');
-        if (translations[key]) {
-          el.textContent = translations[key];
-        }
+        if (translations[key]) el.textContent = translations[key];
       });
 
-      // Dynamically update radar chart toggle labels using translations
-      document.querySelectorAll('.radar-toggle').forEach(el => {
-        const value = el.value;
-        const key = value.toLowerCase(); // Expected keys like "fuel_consumption"
-        const translatedLabel = translations[key] || value;
-        el.nextSibling.textContent = ` ${translatedLabel}`;
-      });
+      // Score-Box-Label aktualisieren (Wert bleibt erhalten)
+      const scoreBox = document.getElementById('scoreBox');
+      if (scoreBox) {
+        const scoreMatch = scoreBox.innerHTML.match(/<strong>(.*?)<\/strong>/);
+        const scoreVal   = scoreMatch ? scoreMatch[1] : '--';
+        const diffMatch  = scoreBox.innerHTML.match(/<\/strong>(.*?)$/s);
+        const diffHtml   = diffMatch ? diffMatch[1] : '/10';
+        scoreBox.innerHTML = `🚀 ${translations.efficiency_score || 'Efficiency Score'}: <strong>${scoreVal}</strong>${diffHtml}`;
+      }
 
-      // Call functions to update UI components if they exist
-      if (typeof updateRadarChartLabels === "function") {
-        updateRadarChartLabels();
-      }
-      if (typeof updateData === "function") {
-        updateData();
-      }
-      
-      const viewTableLink = document.getElementById('viewTableLink');
-      if (viewTableLink && translations.view_table) {
-        viewTableLink.innerHTML = translations.view_table;
-      }
+      // UI-Komponenten neu rendern
+      if (typeof updateRadarChartLabels === 'function') updateRadarChartLabels();
+      if (typeof updateData            === 'function') updateData();
+
+      Logger.debug('index.html', 'applyTranslations() abgeschlossen.');
     }
 
-    // Initialize event listeners and default language on DOM content loaded
-    document.addEventListener("DOMContentLoaded", () => {
-      const storedLang = localStorage.getItem("language") || "en";
+    // =============================================
+    // DOM Loaded – Sprache und Einstellungen laden
+    // =============================================
+    document.addEventListener('DOMContentLoaded', () => {
+      Logger.info('index.html', 'DOMContentLoaded – Initialisierung startet...');
+
+      // Gespeicherte Sprache laden (Fallback: Englisch)
+      const storedLang = localStorage.getItem('language') || 'en';
       setLanguage(storedLang);
 
-      // Set default radar parameters on first visit
-      if (!localStorage.getItem("selectedRadarParams")) {
-        const allRadarValues = Array.from(document.querySelectorAll(".radar-toggle")).map(el => el.value);
-        localStorage.setItem("selectedRadarParams", JSON.stringify(allRadarValues));
+      // Radar-Standard setzen (Erststart: alle aktiviert)
+      if (!localStorage.getItem('selectedRadarParams')) {
+        const allValues = Array.from(document.querySelectorAll('.radar-toggle')).map(el => el.value);
+        localStorage.setItem('selectedRadarParams', JSON.stringify(allValues));
+        Logger.debug('index.html', 'Erststart: Radar-Defaults in localStorage gespeichert.');
       }
-
-      const btn = document.getElementById("settingsBtn");
-      const menu = document.getElementById("settingsMenu");
-      btn.addEventListener("click", () => {
-        menu.classList.toggle("hidden");
-      });
     });
   </script>
 </head>
-<body class="light-mode">
+
+<body class="dark-mode">
   <div class="container">
 
-    <!-- Settings Menu -->
+    <!-- ========================================
+         Settings-Menü (Einstellungen)
+         ======================================== -->
     <div class="settings-container">
-      <button id="settingsBtn" class="settings-button">⚙️</button>
+      <button id="settingsBtn" class="settings-button" title="Settings / Einstellungen">⚙️</button>
+
       <div id="settingsMenu" class="settings-menu hidden">
 
-        <!-- Language Options -->
+        <!-- Sprachauswahl -->
         <div class="language-options">
-          <span role="button" class="lang-flag" onclick="setLanguage('en')">🇬🇧</span>
-          <span role="button" class="lang-flag" onclick="setLanguage('de')">🇩🇪</span>
+          <span role="button" class="lang-flag" onclick="setLanguage('en')" title="English">🇬🇧</span>
+          <span role="button" class="lang-flag" onclick="setLanguage('de')" title="Deutsch">🇩🇪</span>
         </div>
 
-        <!-- Number Format Option -->
+        <!-- Zahlenformat -->
         <div class="format-options">
-          <label style="font-size: 0.85rem;">
-            <input type="checkbox" id="useGermanFormat" onchange="updateData()" />
+          <label>
+            <input type="checkbox" id="useGermanFormat" />
             <span id="labelGermanFormat">Use German number format (1.000,12)</span>
           </label>
         </div>
 
-        <!-- Comparison Display Option -->
+        <!-- Vergleichswerte in Tabelle -->
         <div class="compare-options">
-          <label style="font-size: 0.85rem;">
-            <input type="checkbox" id="showCompareValues" onchange="updateData()" />
+          <label>
+            <input type="checkbox" id="showCompareValues" />
             <span id="labelShowCompare">Show comparison values in table</span>
           </label>
         </div>
 
-        <!-- Radar Chart Parameter Toggles -->
+        <!-- Radar-Chart Parameter -->
         <div class="radar-options">
-          <label style="font-size: 0.85rem;"><strong id="labelRadarChart">Radar Chart Parameters:</strong></label>
-          <label><input type="checkbox" class="radar-toggle" value="price" checked /> Price</label>
-          <label><input type="checkbox" class="radar-toggle" value="fuel_consumption" checked /> Fuel</label>
-          <label><input type="checkbox" class="radar-toggle" value="cruise_speed" checked /> Speed</label>
-          <label><input type="checkbox" class="radar-toggle" value="a_check" checked /> A-Check</label>
-          <label><input type="checkbox" class="radar-toggle" value="crew_total" checked /> Crew</label>
-          <label><input type="checkbox" class="radar-toggle" value="co2_emission" checked /> CO₂</label>
-          <label><input type="checkbox" class="radar-toggle" value="runway_required" checked /> Runway</label>
-          <label><input type="checkbox" class="radar-toggle" value="service_ceiling" checked /> Ceiling</label>
-          <label><input type="checkbox" class="radar-toggle" value="engineers" checked /> Engineers</label>
-          <label><input type="checkbox" class="radar-toggle" value="tech" checked /> Tech</label>
-          <label><input type="checkbox" class="radar-toggle" value="wingspan" checked /> Wingspan</label>
-          <label><input type="checkbox" class="radar-toggle" value="length" checked /> Length</label>
+          <label><strong id="labelRadarChart">Radar Chart Parameters:</strong></label>
+          <label><input type="checkbox" class="radar-toggle" value="price"                checked /> Price</label>
+          <label><input type="checkbox" class="radar-toggle" value="fuel_consumption"     checked /> Fuel</label>
+          <label><input type="checkbox" class="radar-toggle" value="cruise_speed"         checked /> Speed</label>
+          <label><input type="checkbox" class="radar-toggle" value="a_check"              checked /> A-Check</label>
+          <label><input type="checkbox" class="radar-toggle" value="crew_total"           checked /> Crew</label>
+          <label><input type="checkbox" class="radar-toggle" value="co2_emission"         checked /> CO₂</label>
+          <label><input type="checkbox" class="radar-toggle" value="runway_required"      checked /> Runway</label>
+          <label><input type="checkbox" class="radar-toggle" value="service_ceiling"      checked /> Ceiling</label>
+          <label><input type="checkbox" class="radar-toggle" value="engineers"            checked /> Engineers</label>
+          <label><input type="checkbox" class="radar-toggle" value="tech"                 checked /> Tech</label>
+          <label><input type="checkbox" class="radar-toggle" value="wingspan"             checked /> Wingspan</label>
+          <label><input type="checkbox" class="radar-toggle" value="length"               checked /> Length</label>
         </div>
 
-        <!-- Donation Section -->
+        <!-- Spenden-Bereich -->
         <div class="donation-section">
-          <label style="font-size: 0.85rem;"><strong id="labelSupport">Support the project:</strong></label>
-          <a href="https://buymeacoffee.com/poiscoding" target="_blank" style="text-decoration: none; font-size: 0.9rem; margin-top: 0.25rem;">
+          <label><strong id="labelSupport">Support the project:</strong></label>
+          <a href="https://buymeacoffee.com/poiscoding" target="_blank" rel="noopener noreferrer">
             <span id="donationLinkText">☕ Buy me a coffee</span>
           </a>
         </div>
 
-        <!-- Reset Settings -->
-        <div class="reset-settings" style="margin-top: 1rem;">
-          <button onclick="resetLocalStorage()" style="font-size: 0.85rem; padding: 4px 8px;">🗑️ Reset all settings</button>
+        <!-- Einstellungen zurücksetzen -->
+        <div class="reset-settings">
+          <button onclick="resetLocalStorage()">🗑️ Reset all settings</button>
         </div>
 
-      </div>
-    </div>
+      </div><!-- /settingsMenu -->
+    </div><!-- /settings-container -->
 
-    <!-- Main Header -->
-    <!-- <img src="./images/header.png" alt="Header Image" class="header-image"> -->
+    <!-- ========================================
+         Haupttitel
+         ======================================== -->
     <h1 id="title">Aircraft Efficiency Analyzer</h1>
 
-    <!-- Dropdown Selection for Aircraft -->
-    <a id="viewTableLink" href="aircraft-table.html" style="display: inline-block; margin-bottom: 1rem;">📊 View Full Aircraft Table</a>
+    <!-- Link zur vollständigen Übersichtstabelle -->
+    <a id="viewTableLink" href="aircraft-table.html">📊 View Full Aircraft Table</a>
+
+    <!-- ========================================
+         Flugzeug-Auswahl (Dropdowns)
+         ======================================== -->
     <div class="dropdown-row">
+      <!-- Primäres Flugzeug -->
       <div class="dropdown-column">
         <label for="aircraft1" class="dropdown-label" id="labelPrimary">✈️ Primary Aircraft</label>
-        <select id="aircraft1"></select>
-        <img id="img1" class="aircraft-image" src="" alt="Aircraft 1" />
+        <select id="aircraft1" aria-label="Select primary aircraft"></select>
+        <img id="img1" class="aircraft-image" src="" alt="Primary Aircraft" />
       </div>
+
+      <!-- Vergleichs-Flugzeug -->
       <div class="dropdown-column">
         <label for="aircraft2" class="dropdown-label" id="labelCompare">🔁 Compare Aircraft</label>
-        <select id="aircraft2">
+        <select id="aircraft2" aria-label="Select aircraft to compare">
           <option value="">-- None --</option>
         </select>
-        <img id="img2" class="aircraft-image" src="" alt="Aircraft 2" />
+        <img id="img2" class="aircraft-image" src="" alt="Comparison Aircraft" />
       </div>
     </div>
 
-    <!-- Efficiency Score Display -->
-    <div class="score-box" id="scoreBox">Efficiency Score: -- / 10</div>
+    <!-- ========================================
+         Effizienz-Score Anzeige
+         ======================================== -->
+    <div class="score-box" id="scoreBox">
+      🚀 Efficiency Score: <strong>--</strong>/10
+    </div>
 
-    <!-- Results Layout: Table and Chart -->
+    <!-- ========================================
+         Ergebnis: Tabelle + Radar-Chart
+         ======================================== -->
     <div class="result-layout">
-      <table>
-        <thead>
-          <tr>
-            <th id="thParameter">Parameter</th>
-            <th id="thValue">Value</th>
-            <th id="thUnit">Unit</th>
-          </tr>
-        </thead>
-        <tbody id="data-table"></tbody>
-      </table>
+      <!-- Datentabelle mit scrollbarem Container für schmale Screens -->
+      <div class="table-scroll-wrapper" style="flex: 1;">
+        <table>
+          <thead>
+            <tr>
+              <th id="thParameter">Parameter</th>
+              <th id="thValue">Value</th>
+              <th id="thUnit">Unit</th>
+            </tr>
+          </thead>
+          <tbody id="data-table"></tbody>
+        </table>
+      </div>
 
+      <!-- Radar-Chart -->
       <div class="chart-wrapper">
-        <canvas id="efficiencyChart" height="100"></canvas>
+        <canvas id="efficiencyChart"></canvas>
       </div>
     </div>
-  </div>
 
-  <!-- External JavaScript Files -->
-  <script src="./js/aircraftList.js"></script>
-  <script src="./js/aircraftData.js"></script>
-  <script src="./js/scoringUtils.js"></script>
-  <script src="./js/efficiencyScore.js"></script>
-  <script src="./js/main.js"></script>
+  </div><!-- /container -->
 
-  <script>
-    function resetLocalStorage() {
-      localStorage.clear();
-      location.reload();
-    }
-  </script>
-
-  <!-- Footer with Language and Disclaimer Notes -->
+  <!-- ========================================
+       Footer
+       ======================================== -->
   <footer class="language-footer">
-    <!-- Language flags commented out:
-    <span role="button" class="lang-flag" onclick="setLanguage('en')">🇬🇧</span>
-    <span role="button" class="lang-flag" onclick="setLanguage('de')">🇩🇪</span>
-    -->
-    <!-- <div id="languageNote" style="font-size: 0.8rem; margin-top: 0.5rem;"></div> -->
-    <div id="footerNote" style="font-size: 0.8rem; margin-top: 0.5rem;"></div>
-    <div id="footerDisclaimer" style="font-size: 0.8rem; margin-top: 0.25rem;"></div>
+    <div id="footerNote"></div>
+    <div id="footerDisclaimer"></div>
   </footer>
+
+  <!-- ========================================
+       JavaScript – Reihenfolge wichtig!
+       1. Logger muss zuerst geladen werden
+       2. Dann Datenbasis (List + Data)
+       3. Dann Berechnungen
+       4. Zuletzt Hauptlogik
+       ======================================== -->
+  <script src="js/logger.js"></script>
+  <script src="js/aircraftList.js"></script>
+  <script src="js/aircraftData.js"></script>
+  <script src="js/scoringUtils.js"></script>
+  <script src="js/efficiencyScore.js"></script>
+  <script src="js/main.js"></script>
+
 </body>
 </html>
